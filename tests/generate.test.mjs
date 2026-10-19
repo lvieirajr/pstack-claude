@@ -140,14 +140,14 @@ describe("runtime model names", () => {
     }
   });
 
-  test("the Pi section tables every alias per provider, names the fallback, and names the sheet override", () => {
+  test("the Pi section tables every alias per provider and names explicit overrides without a fallback", () => {
     const tables = { ...models.pi.models, marker: { opus: "marker/o", fable: "marker/f", sonnet: "marker/s", haiku: "marker/h" } };
-    const text = piModelNamesSection({ ...models, pi: { fallback: "marker", models: tables } });
+    const text = piModelNamesSection({ ...models, pi: { models: tables } });
     expect(text).toContain(`| Alias | ${Object.keys(tables).map((p) => `\`${p}\``).join(" | ")} |`);
     for (const alias of models.available) {
       expect(text).toContain(`| \`${alias}\` | ${Object.values(tables).map((t) => `\`${t[alias]}\``).join(" | ")} |`);
     }
-    expect(text).toContain("in the `marker` column for any other provider");
+    expect(text).toContain("An unknown or absent parent provider has no fallback column");
     expect(text).toContain("`pi models: ");
   });
 });

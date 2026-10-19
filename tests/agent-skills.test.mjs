@@ -284,18 +284,18 @@ describe("agentSkills reads frontmatter as YAML", () => {
 });
 
 describe("Codex model names", () => {
-  test("names a worker and a strongest Codex model for the roles that default to each on Claude", () => {
+  test("keeps worker roles on parent inheritance and strongest roles on confirmed model choices", () => {
     const raw = JSON.parse(readFileSync(join(repoRoot, "plugins/pstack/models.json"), "utf8"));
     const oneOff = raw.roles.map((r) => (r.role === "swarm workers" ? { ...r, models: ["haiku"] } : r));    const section = codexModelNamesSection(resolveModels({ ...raw, roles: oneOff }));
     const lineWith = (text) => section.split("\n").find((line) => line.includes(text));
-    const strongestLine = lineWith("strongest Claude model");
-    const workerLine = lineWith("Claude worker model");
+    const strongestLine = lineWith("strongest judgment role");
+    const workerLine = lineWith("worker roles");
 
     expect(workerLine).not.toContain("swarm workers");
 
     expect(strongestLine).toContain(`\`${raw.codex.strongest}\``);
     expect(strongestLine).toContain("`strongest judgment`");
-    expect(workerLine).toContain(`\`${raw.codex.worker}\``);
+    expect(workerLine).toContain("inherit the session model");
     expect(workerLine).toContain("`feature, refactoring`");
     for (const role of ["bug-fix", "perf-issue", "hillclimb", "reflect tooling"]) {
       expect(workerLine).not.toContain(`\`${role}\``);

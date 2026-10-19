@@ -169,6 +169,15 @@ describe("Copilot SessionStart context", () => {
     expect(ctx).not.toContain("sheet invalid");
   });
 
+  test("a reduced panel reaches context with the restriction on diverse-model review gates", () => {
+    const sheet = [...sheetLines({ "arena runners": "inherit-parent, auto, inherit-parent" }), "panel diversity: reduced"].join("\n");
+    const ctx = copilotContext(sheet);
+    expect(ctx).toContain("arena runners: inherit-parent, auto, inherit-parent");
+    expect(ctx).toContain("panel diversity: reduced");
+    expect(ctx).toContain("cannot satisfy a review gate requiring diverse models");
+    expect(ctx).not.toContain("sheet invalid");
+  });
+
   test("a valid sheet reaches the context as a CRLF file with a byte-order mark and as UTF-16 LE", () => {
     const want = copilotContext(validSheet());
     expect(copilotContext(`\uFEFF${validSheet().replaceAll("\n", "\r\n")}`)).toBe(want);

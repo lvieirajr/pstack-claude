@@ -139,7 +139,6 @@ describe("model resolution", () => {
       await pi.call("agent", { description: "m", prompt: "x", model }, ctx);
     }
     await pi.call("agent", { description: "m", prompt: "x" }, fakeCtx({ cwd: w.cwd, model: null }));
-    await pi.call("agent", { description: "m", prompt: "x", model: "opus" }, fakeCtx({ cwd: w.cwd, model: null }));
     expect(w.invocations().map(modelOf)).toEqual([
       "anthropic/fixture-opus",
       "openai/sheet-sonnet",
@@ -148,22 +147,17 @@ describe("model resolution", () => {
       "openai/gpt-x",
       "anthropic/parent-model",
       null,
-      "anthropic/fixture-opus",
     ]);
   });
 
-  test("a family name resolves in the table of the parent's provider, and in the fallback table on any other", async () => {
+  test("a family name uses the parent's provider unless the user explicitly overrides it", async () => {
     const { w, pi } = setup({ sheet: "pi models: haiku=anthropic/sheet-haiku\n" });
     const on = (provider) => fakeCtx({ cwd: w.cwd, model: { provider, id: "parent" } });
     for (const model of ["opus", "fable", "haiku"]) await pi.call("agent", { description: "m", prompt: "x", model }, on("openai-codex"));
-    await pi.call("agent", { description: "m", prompt: "x", model: "opus" }, on("openrouter"));
-    await pi.call("agent", { description: "m", prompt: "x", model: "opus" }, on("constructor"));
     expect(w.invocations().map(modelOf)).toEqual([
       "openai-codex/fixture-opus",
       "openai-codex/fixture-fable",
       "anthropic/sheet-haiku",
-      "anthropic/fixture-opus",
-      "anthropic/fixture-opus",
     ]);
   });
 
@@ -175,6 +169,107 @@ describe("model resolution", () => {
     chmodSync(sheet, 0o600);
     await pi.call("agent", { description: "m", prompt: "x", model: "sonnet" }, ctx);
     expect(w.invocations().map(modelOf)).toEqual(["anthropic/fixture-sonnet", "openai/sheet-sonnet"]);
+  });
+
+  test("an unknown or absent provider requires an explicit alias mapping", async () => {
+    const { w, pi } = setup();
+    for (const provider of ["openrouter", "constructor", undefined]) {
+      const ctx = fakeCtx({ cwd: w.cwd, model: provider ? { provider, id: "parent" } : null });
+      await expect(pi.call("agent", { description: "m", prompt: "x", model: "opus" }, ctx)).rejects.toThrow('No Pi model mapped for "opus"');
+    }
+    expect(w.invocations()).toEqual([]);
+  });
+
+  test("an explicit mapping works even when the parent provider is unlisted", async () => {
+    const { w, pi } = setup({ sheet: "pi models: opus=openai/sheet-sonnet\n" });
+    const ctx = fakeCtx({ cwd: w.cwd, model: { provider: "openrouter", id: "parent" } });
+    await pi.call("agent", { description: "m", prompt: "x", model: "opus" }, ctx);
+    expect(w.invocations().map(modelOf)).toEqual(["openai/sheet-sonnet"]);
+  });
+
+  test("an unavailable explicit model fails before creating a child", async () => {
+    const { w, pi, ctx } = setup();
+    ctx.modelRegistry.find = () => undefined;
+    await expect(pi.call("agent", { description: "m", prompt: "x", model: "openai/unavailable" }, ctx)).rejects.toThrow('Unknown Pi model "openai/unavailable"');
+    expect(w.invocations()).toEqual([]);
+  });
+
+  test("missing credentials fail before creating a child", async () => {
+    const { w, pi, ctx } = setup({ ctx: { auth: "none" } });
+    await expect(pi.call("agent", { description: "m", prompt: "x", model: "opus" }, ctx)).rejects.toThrow('No configured Pi credentials for "anthropic"');
+    expect(w.invocations()).toEqual([]);
+  });
+
+  test.each([["foreground", false], ["background", true]])("cancellation during credential validation prevents a %s child launch", async (_mode, run_in_background) => {
+    const { w, pi, ctx } = setup({ ctx: { auth: "live-check-only" } });
+    let releaseCredentials;
+    ctx.modelRegistry.getAvailableOfType = () => new Promise((resolve) => { releaseCredentials = resolve; });
+    const controller = new AbortController();
+    const attempt = pi.call("agent", { description: "cancelled", prompt: "x", run_in_background }, ctx, controller.signal);
+    expect(typeof releaseCredentials).toBe("function");
+    controller.abort();
+    releaseCredentials([ctx.model]);
+    const error = await attempt.catch((e) => e);
+    expect(error.name).toBe("AbortError");
+    expect(w.invocations()).toEqual([]);
+    expect(await listAgents(pi, ctx)).toEqual([]);
+  });
+
+  test("an already cancelled launch does not start credential validation or a child", async () => {
+    const { w, pi, ctx } = setup({ ctx: { auth: "live-check-only" } });
+    let checks = 0;
+    ctx.modelRegistry.getAvailableOfType = async () => { checks++; return [ctx.model]; };
+    const controller = new AbortController();
+    controller.abort();
+    const error = await pi.call("agent", { description: "cancelled", prompt: "x" }, ctx, controller.signal).catch((e) => e);
+    expect(error.name).toBe("AbortError");
+    expect(checks).toBe(0);
+    expect(w.invocations()).toEqual([]);
+  });
+
+  test("an unsupported explicit effort fails instead of being clamped", async () => {
+    const { w, pi, ctx } = setup();
+    ctx.modelRegistry.find = (provider, id) => ({ provider, id, reasoning: true, thinkingLevelMap: { xhigh: null } });
+    await expect(pi.call("agent", { description: "m", prompt: "x", subagent_type: "pstack:effort-xhigh" }, ctx)).rejects.toThrow('does not support thinking level "xhigh"');
+    expect(w.invocations()).toEqual([]);
+  });
+
+  test("parent inheritance preserves an unlisted provider without selecting another provider", async () => {
+    const { w, pi } = setup();
+    const ctx = fakeCtx({ cwd: w.cwd, model: { provider: "openrouter", id: "custom-parent" } });
+    for (const model of [undefined, "auto", "inherit-parent"]) await pi.call("agent", { description: "m", prompt: "x", model }, ctx);
+    expect(w.invocations().map(modelOf)).toEqual(Array(3).fill("openrouter/custom-parent"));
+    expect(w.invocations().map((inv) => flag(inv, "--thinking"))).toEqual(Array(3).fill("medium"));
+  });
+
+  test("a model switch uses its native default effort unless an effort is explicit", async () => {
+    const { w, pi, ctx } = setup();
+    await pi.call("agent", { description: "m", prompt: "x", model: "opus" }, ctx);
+    await pi.call("agent", { description: "m", prompt: "x", model: "opus", subagent_type: "pstack:effort-high" }, ctx);
+    expect(w.invocations().map((inv) => flag(inv, "--thinking"))).toEqual([null, "high"]);
+  });
+
+  test.each([
+    ["pstack:effort-low", { reasoning: false }],
+    ["pstack:effort-max", { reasoning: true }],
+    ["pstack:effort-high", { reasoning: true, thinkingLevelMap: { high: null } }],
+  ])("unsupported model thinking metadata rejects %s", async (subagent_type, metadata) => {
+    const { w, pi, ctx } = setup();
+    ctx.modelRegistry.find = (provider, id) => ({ provider, id, ...metadata });
+    await expect(pi.call("agent", { description: "m", prompt: "x", subagent_type }, ctx)).rejects.toThrow("does not support thinking level");
+    expect(w.invocations()).toEqual([]);
+  });
+
+  test("an explicit effort without a selected model requests configuration", async () => {
+    const { w, pi, ctx } = setup({ ctx: { model: null } });
+    await expect(pi.call("agent", { description: "m", prompt: "x", subagent_type: "pstack:effort-high" }, ctx)).rejects.toThrow("without a selected Pi model");
+    expect(w.invocations()).toEqual([]);
+  });
+
+  test("Pi's live availability check can authorize credentials absent from its static snapshot", async () => {
+    const { w, pi, ctx } = setup({ ctx: { auth: "live-check-only" } });
+    await pi.call("agent", { description: "m", prompt: "x" }, ctx);
+    expect(w.invocations().map(modelOf)).toEqual(["anthropic/parent-model"]);
   });
 
   test("an unknown alias is an error naming the valid values", async () => {

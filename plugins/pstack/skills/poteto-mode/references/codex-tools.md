@@ -31,7 +31,7 @@ The documented default is enabled. `max_concurrent_threads_per_session` in the s
 
 When `spawn_agent` is unavailable or delegation is prohibited, the fan-out skills (`interrogate`, `why`, `how`, `arena`, `reflect`) may use a labelled sequential pass for exploration. A required independent review does not degrade. It stays blocked, as poteto-mode's [Subagents](../SKILL.md#subagents) section says.
 
-Enabling agents does not lift the host's thread limit. A thread-limit error from `spawn_agent` is a capacity error, not a rejected model slug, so the skills' fallback to another model does not apply. After the first capacity rejection, stop spawning. Close a finished agent with `close_agent` before you try again, and where the session has no `close_agent`, do not assume a finished agent's slot is free.
+Enabling agents does not lift the host's thread limit. A thread-limit error from `spawn_agent` is a capacity error, not a rejected model slug, so changing the requested model cannot resolve it. After the first capacity rejection, stop spawning. Close a finished agent with `close_agent` before you try again, and where the session has no `close_agent`, do not assume a finished agent's slot is free.
 
 ## Subagent policy
 
@@ -39,7 +39,7 @@ poteto-mode's Subagents section sets Claude-specific defaults (`subagent_type: "
 
 - There is no `poteto-agent` subagent type. Route an ad-hoc subagent through poteto-mode's style by dispatching a `spawn_agent` whose instructions tell it to read the `poteto-mode` skill in full first.
 - `spawn_agent` calls already run concurrently with your turn, so `run_in_background: true` has no separate flag. Issue the dispatch and continue.
-- There are no `pstack:effort-<level>` or `pstack:poteto-agent-<level>` types. When a role value carries `@<level>`, or the `default effort` line names a level, pass that level as `spawn_agent`'s `reasoning_effort` and keep the dispatch otherwise unchanged. `session` passes no `reasoning_effort`.
+- There are no `pstack:effort-<level>` or `pstack:poteto-agent-<level>` types. When a role value carries `@<level>`, or the `default effort` line names a level, pass it through the host's native reasoning selector only when exposed and supported. Respect any requirement for a fresh context when selecting a model or effort. If the host or native agent configuration cannot honor the choice, report that limitation before dispatch; do not silently ignore it. `session` passes no `reasoning_effort`.
 - There is no `comment-sicko` subagent type either. The **no-comments** skill spawns it on Claude Code; on Codex dispatch a `spawn_agent` whose instructions tell it to read `poteto-mode/references/agents/comment-sicko.md` in full first.
 - There are no `thermo-nuclear-review-subagent` or `thermo-nuclear-code-quality-review-subagent` types. The **thermos** skill spawns both on Claude Code; on Codex dispatch two `spawn_agent` calls whose instructions tell each to read the `thermo-nuclear-review` or `thermo-nuclear-code-quality-review` skill in full first and review only the diff and file contents in its prompt.
 - Claude Code runs every subagent on this machine, so the **swarm** skill's workers and the fan-out playbooks (`orchestrate`, `autopilot-full`, `autopilot-stack`) isolate writers with worktrees. The same holds on Codex.
@@ -47,14 +47,11 @@ poteto-mode's Subagents section sets Claude-specific defaults (`subagent_type: "
 
 ## Model names
 
-Skills name Claude defaults (a single-role default for code/prose/judgment, a worker model for feature and refactoring code, plus a diverse-model panel for diverse-model panels; each model-consuming skill lists its own in a Models section). These slugs do not resolve on Codex. Substitute your configured Codex models:
+Follow the [model selection contract](model-selection.md). Ordinary single-model roles, including worker roles (`feature, refactoring`), inherit the session model unless explicitly configured. Do not translate inheritance into a fixed OpenAI model.
 
-- Single-model roles: your primary Codex model (for example `gpt-6-sol`).
-- Roles that default to the Claude worker model (`feature, refactoring`): your fast Codex code model (for example `gpt-6-sol`).
-- Roles that default to the strongest Claude model (`strongest judgment`): your strongest Codex model (for example `gpt-6-astra`).
-- Diverse-model panels (`arena`, `architect`, `interrogate`, `how` critics, `reflect`): the adversarial signal comes from model diversity, so use the distinct Codex models available to you. A good default panel on ChatGPT is `gpt-6-astra`, `gpt-6-sol`, `gpt-6-luna`. If only one model family is reachable, vary reasoning effort and note in the verdict that diversity was reduced.
+The strongest judgment role (`strongest judgment`) needs the user's confirmed strongest available Codex model; `gpt-6-astra` is an example, not an automatic selection. The example panel is `gpt-6-astra`, `gpt-6-sol`, `gpt-6-luna`. Confirm each model against the active harness and account before using it. A configured role or effort is authoritative: use the exposed native selector or agent configuration, and report an unavailable selector, unsupported model, or unsupported effort instead of silently dropping or replacing the choice.
 
-`/setup-pstack` writes the configured model list. On Codex, set it to your Codex model slugs.
+Panel entries must resolve to distinct models for model diversity. Different effort levels on one model do not satisfy a diverse-model review gate. `/setup-pstack` records the chosen Codex models.
 
 ## Session routing hook
 

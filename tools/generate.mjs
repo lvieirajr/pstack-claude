@@ -573,7 +573,7 @@ export function parseModels(raw, skillExists) {
   for (const key of ["tiers", ...RUNTIMES.filter((runtime) => runtime.key).map((runtime) => runtime.key)]) {
     if (!isObject(raw[key])) fail(`"${key}" must be an object`);
   }
-  const available = new Set(raw.available);
+  const available = new Set([...raw.available, "inherit-parent", "auto"]);
   unique(raw.available, "available");
   for (const tier of TIERS) {
     if (!Object.hasOwn(raw.tiers, tier)) fail(`tiers has no "${tier}", which a stamped region renders from`);
@@ -582,6 +582,9 @@ export function parseModels(raw, skillExists) {
   for (const [tier, value] of Object.entries(raw.tiers)) {
     const slugs = [value].flat();
     unique(slugs, `tier "${tier}"`);
+    if (tier === "panel" && (!Array.isArray(value) || slugs.filter((s) => !["inherit-parent", "auto"].includes(s)).length < 2)) {
+      fail('tier "panel" needs at least two explicit models');
+    }
     for (const slug of slugs) {
       if (!available.has(slug)) fail(`tier "${tier}" names "${slug}", which is not in available`);
     }
@@ -675,7 +678,10 @@ export function modelsSection(roles) {
   const bullets = roles.map((r) => `- ${r.role}: ${codeList(r.models)}`).join("\n");
   return (
     "Role defaults, stamped from `plugins/pstack/models.json` (edit there, rerun `tools/generate.mjs`). " +
-    "A matching role line in the `pstack-models.md` override sheet overrides each at runtime; `/setup-pstack` writes it and lists its path per runtime.\n\n" +
+    "A matching role line in `pstack-models.md` takes precedence. Follow the " +
+    "[model selection contract](../poteto-mode/references/model-selection.md): parent aliases inherit; " +
+    "explicit choices must be supported; strongest-model and diverse-panel requirements need confirmed models. " +
+    "`/setup-pstack` records choices at the current runtime's documented path.\n\n" +
     bullets
   );
 }
@@ -689,14 +695,17 @@ export function effortSection(levels, defaultEffort) {
     "A role value in the override sheet may name a reasoning effort after its model, as in `opus @xhigh`. " +
     "Levels on Claude Code: " + codeList(levels) + ". Which ones apply depends on the model. " +
     "A value without `@` takes the sheet's `default effort` line, a level or `session`, " +
-    `and ${code(defaultEffort)} when the sheet has no such line. \`session\` sets no effort, so the dispatch ` +
-    "is the usual one. Strip the suffix before reading the model: `inherit-parent` or `auto` still omits `model` " +
+    `and ${code(defaultEffort)} when the sheet has no such line. \`session\` sets no explicit effort: ` +
+    "inherit it on the same model, or use the selected model's native default after a model switch. Strip the suffix before reading the model: `inherit-parent` or `auto` still omits `model` " +
     "at every level, and a model name is passed as `model`. " +
     "On Claude Code, a level picks the effort agent from the `subagent_type` you would otherwise use. " +
     "`pstack:poteto-agent` becomes `subagent_type: \"pstack:poteto-agent-<level>\"`. " +
     "`general-purpose`, or no `subagent_type`, becomes `subagent_type: \"pstack:effort-<level>\"`. " +
     "The effort agents set only `effort`, so the model you pass still decides the model. " +
-    "On Codex, pass the level as `spawn_agent`'s `reasoning_effort` and keep the usual instructions."
+    "On Codex or Copilot, use the native `reasoning_effort` selector only when exposed and supported; report an " +
+    "unavailable selector instead of ignoring the level. On Pi, the effort agent passes `--thinking` after " +
+    "checking the model's supported levels. On OpenCode, use the configured native agent's provider-specific " +
+    "reasoning options. Follow the [model selection contract](../poteto-mode/references/model-selection.md)."
   );
 }
 
@@ -782,10 +791,10 @@ export function overrideSheetBlock(models) {
     "Per-role model overrides for pstack skills. Each pstack SKILL.md names its defaults in a Models section; " +
     "the values here override those defaults. Delete a line to fall back to the skill default. " +
     "A value of `inherit-parent` or `auto` runs that role on the parent session's model (the `Agent` call omits `model`); " +
-    "an alias entry in a panel list still counts toward that panel's fan-out. " +
+    "an alias entry counts toward fan-out but is not evidence of model diversity. " +
     "A model may carry a reasoning effort, as in `opus @xhigh` (levels: " + models.efforts.join(", ") + "); " +
-    "the role then runs through the pstack effort agent of that level, each entry of a panel list on its own. " +
-    "`default effort` sets the level for a value without one; `session` keeps the parent session's effort. " +
+    "validate the level for the chosen model and harness and apply its native reasoning mapping to each panel entry. " +
+    "`default effort` sets the level for a value without one; `session` inherits on the same model and uses the selected model's native default after a switch. " +
     "`session hook: off` stops the Claude Code or Codex SessionStart hook, or the pstack Pi extension, from injecting the poteto-mode mandate; " +
     "any other value, or no line, leaves it on.\n\n" +
     rows +

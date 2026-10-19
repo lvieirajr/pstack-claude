@@ -14,6 +14,7 @@ END {
     notes = notes "\n\n" text("session-start-copilot-sheet.md") "\n"
     for (i = 1; i <= n; i++) notes = notes "\n" roles[i] ": " VALUE[roles[i]]
     if ("default effort" in VALUE) notes = notes "\ndefault effort: " VALUE["default effort"]
+    if (PANEL_REDUCED) notes = notes "\npanel diversity: reduced. Repeated models or different reasoning efforts do not count as model diversity and cannot satisfy a review gate requiring diverse models."
   } else {
     if (found) notes = notes "\n\nsheet invalid: " problems
     notes = notes "\n\n" text("session-start-copilot-setup.md")

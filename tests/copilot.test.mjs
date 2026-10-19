@@ -55,7 +55,7 @@ describe("copilot-tools.md coverage", () => {
   }
 
   test("the mapping ships no model slug", () => {
-    for (const slug of [...models.codex.panel, models.codex.default, models.codex.strongest]) expect(mapping).not.toContain(slug);
+    for (const slug of [...models.codex.panel, models.codex.default, models.codex.strongest].filter((s) => !["inherit-parent", "auto"].includes(s))) expect(mapping).not.toContain(slug);
   });
 
   test("every skill with a per-skill note exists and every pointed skill has one or needs none", () => {

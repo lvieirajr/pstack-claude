@@ -71,18 +71,20 @@ function checkCodexModels(codex, { raw, fail, unique }) {
   for (const [tier, value] of Object.entries(codex)) {
     if (!Object.hasOwn(raw.tiers, tier)) fail(`codex names "${tier}", which is not a tier`);
     unique([value].flat(), `codex "${tier}"`);
+    if (tier === "panel" && (!Array.isArray(value) || value.filter((s) => !["inherit-parent", "auto"].includes(s)).length < 2)) {
+      fail('codex "panel" needs at least two explicit models');
+    }
   }
 }
 
 // The pstack Pi extension resolves each Claude alias a skill names through the
-// table of the session's provider, or the fallback table on any other provider,
-// so every table maps exactly the available aliases to that provider's models.
+// table of the session's provider. Unknown providers need an explicit mapping;
+// every known table maps exactly the available aliases to that provider's models.
 function checkPiModels(pi, { raw, fail, isObject }) {
   for (const key of Object.keys(pi)) {
-    if (key !== "fallback" && key !== "models") fail(`pi names "${key}"; its keys are "fallback" and "models"`);
+    if (key !== "models") fail(`pi names "${key}"; its only key is "models"`);
   }
   if (!isObject(pi.models)) fail('pi needs a "models" object');
-  if (!Object.hasOwn(pi.models, pi.fallback)) fail(`pi.fallback "${pi.fallback}" is not a provider in pi.models`);
   for (const [provider, table] of Object.entries(pi.models)) {
     const at = `pi.models.${provider}`;
     if (!isObject(table)) fail(`${at} must be an object`);
@@ -94,6 +96,9 @@ function checkPiModels(pi, { raw, fail, isObject }) {
       if (typeof id !== "string" || !id.startsWith(`${provider}/`) || /\s/.test(id) || id === `${provider}/`) {
         fail(`${at} "${alias}" is "${id}", not a ${provider}/<id>`);
       }
+    }
+    if (new Set(raw.tiers.panel.map((alias) => table[alias]).filter(Boolean)).size < 2) {
+      fail(`${at} panel resolves to fewer than two distinct model IDs`);
     }
   }
 }
@@ -107,45 +112,40 @@ const tierRoles = (models, tier) =>
 
 export function codexModelNamesSection(models) {
   return (
-    "Skills name Claude defaults (a single-role default for code/prose/judgment, a worker model for " +
-    "feature and refactoring code, plus a diverse-model panel for diverse-model panels; each model-consuming skill lists its own in a " +
-    "Models section). These slugs do not resolve on Codex. Substitute your configured Codex models:\n\n" +
-    `- Single-model roles: your primary Codex model (for example ${code(models.codex.default)}).\n` +
-    `- Roles that default to the Claude worker model (${tierRoles(models, "worker")}): ` +
-    `your fast Codex code model (for example ${code(models.codex.worker)}).\n` +
-    `- Roles that default to the strongest Claude model (${tierRoles(models, "strongest")}): ` +
-    `your strongest Codex model (for example ${code(models.codex.strongest)}).\n` +
-    "- Diverse-model panels (`arena`, `architect`, `interrogate`, `how` critics, `reflect`): the adversarial " +
-    "signal comes from model diversity, so use the distinct Codex models available to you. A good default panel " +
-    `on ChatGPT is ${codeList(models.codex.panel)}. If only one model family is reachable, vary reasoning ` +
-    "effort and note in the verdict that diversity was reduced.\n\n" +
-    "`/setup-pstack` writes the configured model list. On Codex, set it to your Codex model slugs."
+    "Follow the [model selection contract](model-selection.md). Ordinary single-model roles, including " +
+    `worker roles (${tierRoles(models, "worker")}), inherit the session model unless explicitly configured. ` +
+    "Do not translate inheritance into a fixed OpenAI model.\n\n" +
+    `The strongest judgment role (${tierRoles(models, "strongest")}) needs the user's confirmed strongest ` +
+    `available Codex model; ${code(models.codex.strongest)} is an example, not an automatic selection. ` +
+    `The example panel is ${codeList(models.codex.panel)}. Confirm each model against the active harness ` +
+    "and account before using it. A configured role or effort is authoritative: use the exposed native " +
+    "selector or agent configuration, and report an unavailable selector, unsupported model, or unsupported " +
+    "effort instead of silently dropping or replacing the choice.\n\n" +
+    "Panel entries must resolve to distinct models for model diversity. Different effort levels on one " +
+    "model do not satisfy a diverse-model review gate. `/setup-pstack` records the chosen Codex models."
   );
 }
 
 export function piModelNamesSection(models) {
-  const { fallback, models: tables } = models.pi;
+  const tables = models.pi.models;
   const columns = Object.keys(tables);
   const table =
     `| Alias | ${columns.map(code).join(" | ")} |\n| --- |${" --- |".repeat(columns.length)}\n` +
     models.available.map((alias) => `| ${code(alias)} | ${columns.map((p) => code(tables[p][alias])).join(" | ")} |`).join("\n");
   return (
-    "Skills name models by the Claude aliases in their Models sections. On Pi, pass the alias as the `agent` " +
-    "tool's `model`. The pstack extension resolves it in the column of the provider the session's current model " +
-    `comes from, and in the ${code(fallback)} column for any other provider:\n\n` +
+    "Follow the [model selection contract](model-selection.md). Ordinary roles use `inherit-parent`, " +
+    "`auto`, or no `model`, so they run on the parent's current model. Explicit family aliases resolve " +
+    "only in the current provider's column. An unknown or absent parent provider has no fallback column:\n\n" +
     table +
-    "\n\nPi warns that Anthropic bills Claude used through Pi per token, as extra usage, even on a Claude subscription. " +
-    "Pi shows that warning only in interactive mode, never for the `pi --mode rpc` children the `agent` tool runs.\n\n" +
-    "A `pi models: opus=<provider/id>, sonnet=<provider/id>` line in the Pi override sheet points each alias " +
-    "it names at another Pi model, whatever the session's provider. Add one when the session's provider has no " +
-    `column above and Pi has no credentials for ${code(fallback)}, because each alias then resolves to an ${code(`${fallback}/*`)} ` +
-    `ID and the ${code("agent")} call fails with ${code(`No API key found for ${fallback}`)}. ` +
-    "The `agent` tool also takes a full " +
-    "`provider/id`, passed through unchanged, and `inherit-parent`, `auto`, or no `model` runs the child on the " +
-    "parent's current model. Diverse-model panels (`arena`, `architect`, `interrogate`, `how` critics, `reflect`) " +
-    "stay diverse only while their aliases resolve to distinct models. If one model family is all you can reach, " +
-    "vary the reasoning effort and note in the verdict that diversity was reduced.\n\n" +
-    "`/setup-pstack` writes the configured model list. On Pi, keep the aliases and remap them with `pi models:`."
+    "\n\nA `pi models: opus=<provider/id>, sonnet=<provider/id>` line in the Pi sheet explicitly remaps aliases, " +
+    "including across providers. A full `provider/id` is also an explicit choice. The extension checks the " +
+    "resolved ID and configured credentials against Pi's active registry before launching a child. An " +
+    "unmapped alias, unknown model, or missing credentials fails with configuration instructions; it never " +
+    "silently selects another provider.\n\n" +
+    "Pi bills Claude per token as extra usage even on a Claude subscription. Its interactive warning does " +
+    "not appear for RPC children. Only select that provider deliberately.\n\n" +
+    "Keep panels on distinct resolved models. Aliases mapped to one model or varied reasoning effort do " +
+    "not satisfy model diversity. `/setup-pstack` lists Pi's available models and records explicit choices."
   );
 }
 
@@ -205,7 +205,8 @@ export const roleSkills = (models) => [...new Set(models.roles.map((r) => r.skil
 // by plan and policy, so the user picks them in setup-pstack.
 export function copilotModelNamesSection(models) {
   return (
-    "Skills name Claude Code model aliases in their Models sections. Those aliases are not Copilot model IDs, " +
+    "Follow the [model selection contract](model-selection.md). Ordinary unconfigured single-model roles " +
+    "inherit the session model by omitting `model`. The remaining Claude aliases are not Copilot model IDs, " +
     "and the Copilot build ships no default model IDs: the models an account can reach depend on its plan " +
     "and policy, so the user picks them once.\n\n" +
     "- The model sheet is `${COPILOT_HOME:-~/.copilot}/pstack-models.md`. It sits outside the workspace, so reading it " +
@@ -218,8 +219,9 @@ export function copilotModelNamesSection(models) {
     "`echo \"${COPILOT_HOME:-$HOME/.copilot}/pstack-models.md\"`" +
     ") and read and write exactly that path; do not append `.copilot` or any other segment to it. A session with its " +
     "own `COPILOT_HOME` then never touches `~/.copilot`.\n" +
-    `- No sheet, or the hook reports \`sheet invalid\`: before a skill that needs a role model (${roleSkills(models).map(code).join(", ")}), stop, load ` +
-    "`setup-pstack` with the `skill` tool, and finish it first. In that same session, use the values it just wrote; " +
+    "- No sheet: ordinary roles inherit the session model. If an existing sheet is invalid, fix it before " +
+    "using its role overrides. A strongest-model role or diverse panel needs confirmed choices: load " +
+    "`setup-pstack` with the `skill` tool when those are missing. In that same session, use the values it just wrote; " +
     "later sessions get them from the hook. Do not ask again on later runs.\n" +
     "- A role line in the sheet is the user's explicit model instruction, so pass it as the `task` tool's " +
     "`model` parameter. `inherit-parent` or `auto` omits `model`.\n" +
@@ -232,8 +234,9 @@ export function copilotModelNamesSection(models) {
     "the strongest model the user chose.\n" +
     "- Diverse-model panels (`arena`, `architect`, `interrogate`, `how` critics, `reflect`): the adversarial " +
     "signal comes from model diversity, so fill a panel from distinct vendors in the `task` tool's `model` " +
-    "list (Claude, GPT, Gemini, Grok, and so on). pstack ships no default Copilot panel. If only one vendor is " +
-    "reachable, vary reasoning effort and note in the verdict that diversity was reduced.\n\n" +
+    "list. pstack ships no default Copilot panel. Repeated models or different reasoning effort do not " +
+    "establish model diversity. Explicitly record a reduced panel as `panel diversity: reduced`; it cannot " +
+    "satisfy a gate requiring diverse models. `panel vendors: any` waives only the vendor check.\n\n" +
     "`setup-pstack` lists the models from the `model` enum of the `task` tool and writes only IDs it saw there. " +
     "After it writes the sheet, it runs its `check-sheet.sh` script, which applies the hook's checks.\n\n" +
     "Run `setup-pstack`, and the parent session that orchestrates a panel, on a model at least as strong as " +

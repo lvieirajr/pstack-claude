@@ -64,6 +64,20 @@ describe("check-sheet.sh", () => {
     test(`rejects ${name}`, () => expect(check(text)).toEqual(invalid(problem)));
   }
 
+  test.each(["gpt-5.5", "gpt-5.5 @low, gpt-5.5 @high", "inherit-parent, auto"])("rejects a panel without distinct models: %s", (panel) => {
+    const result = check(sheet({ "arena runners": panel }, ["panel vendors: any"]));
+    expect(result.status).toBe(1);
+    expect(result.out).toContain('`arena runners` needs at least two distinct model IDs');
+  });
+
+  test("two distinct models from one vendor retain both seats when the vendor check is waived", () => {
+    expect(check(sheet({ "arena runners": "gpt-5.5 @low, gpt-5.4 @high" }, ["panel vendors: any"]))).toEqual(ok);
+  });
+
+  test("a deliberately reduced panel needs its own explicit setting", () => {
+    expect(check(sheet({ "arena runners": "inherit-parent, auto, inherit-parent" }, ["panel diversity: reduced"]))).toEqual(ok);
+  });
+
   test("reads the Copilot sheet when no path is given", () => {
     const copilotHome = join(home, "copilot-home");
     mkdirSync(copilotHome, { recursive: true });

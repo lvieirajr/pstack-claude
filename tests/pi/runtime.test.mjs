@@ -31,7 +31,7 @@ describe.skipIf(!piDir || noNode)("installed Pi child startup", () => {
       try {
         // /loop without arguments only prints usage. A handled command proves
         // pstack loaded, without starting a model run in the child.
-        const started = runner.start({ description: "startup probe", prompt: "/loop", isolation }, ctx);
+        const started = await runner.start({ description: "startup probe", prompt: "/loop", isolation }, ctx);
         const result = await runner.wait(started.agent.id);
         expect(result.finalText).toContain("consumed the prompt as an extension command");
         expect(result.exitCode).toBe(0);

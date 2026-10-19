@@ -9,7 +9,7 @@ import { Value } from "typebox/value";
 import { noticeOf, OUTPUT_CAP_BYTES, statusText, truncateUtf8 } from "./agent-text.ts";
 import type { AgentParams } from "./agent-tools.ts";
 import { type Activity, alive, type ChildExit, PiChild, terminateGroup } from "./child.ts";
-import { DEPTH_FLAG, GENERAL_PURPOSE, loadAgentTypes, PSTACK_STATE_DIR, readSheet, resolveModel, type Settings } from "./config.ts";
+import { DEPTH_FLAG, GENERAL_PURPOSE, loadAgentTypes, PSTACK_STATE_DIR, readSheet, resolveModel, type Settings, validateModel } from "./config.ts";
 import { ensureWorktree, planWorktree, settleWorktree, type Worktree, worktreeSchema } from "./worktree.ts";
 
 const ENTRY_TYPE = "pstack-agents";
@@ -203,13 +203,19 @@ export class AgentRunner {
     private readonly settings: Settings,
   ) {}
 
-  start(params: AgentParams, ctx: ExtensionContext): RunningRecord {
+  async start(params: AgentParams, ctx: ExtensionContext, signal?: AbortSignal): Promise<RunningRecord> {
+    signal?.throwIfAborted();
     const type = params.subagent_type || GENERAL_PURPOSE;
     const types = loadAgentTypes(this.settings);
     const def = types.get(type);
     if (!def) throw new Error(`Unknown subagent_type "${type}". Valid types: ${[...types.keys()].join(", ")}.`);
     const parentModel = ctx.model ? `${ctx.model.provider}/${ctx.model.id}` : undefined;
     const model = resolveModel(params.model ?? def.model, this.settings, readSheet(this.settings.agentDir), parentModel);
+    // Inherit effort on the same model. A different model uses its own default
+    // unless an effort agent explicitly requests a supported level.
+    const thinking = def.effort ?? (model && model === parentModel ? this.pi.getThinkingLevel() : undefined);
+    await validateModel(model, thinking, ctx, signal);
+    signal?.throwIfAborted();
 
     const id = `a${randomBytes(8).toString("hex")}`;
     const state = join(this.settings.agentDir, PSTACK_STATE_DIR, ctx.sessionManager.getSessionId());
@@ -222,8 +228,7 @@ export class AgentRunner {
       description: params.description,
       subagentType: type,
       model,
-      // Claude Code subagents without an effort run at the session's effort.
-      thinking: def.effort ?? this.pi.getThinkingLevel(),
+      thinking,
       readonly: params.readonly || undefined,
       sessionId: randomUUID(),
       sessionDir,

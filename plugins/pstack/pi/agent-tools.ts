@@ -73,7 +73,11 @@ export function registerAgentTools(pi: ExtensionAPI, runner: AgentRunner): void 
     promptSnippet: "Launch a subagent (foreground or background, optional worktree isolation)",
     parameters: agentParams,
     async execute(_id, params, signal, _onUpdate, ctx) {
-      const started = runner.start(params, ctx);
+      const started = await runner.start(params, ctx, signal);
+      if (signal?.aborted) {
+        await runner.stop(started.agent.id);
+        signal.throwIfAborted();
+      }
       if (params.run_in_background) {
         return {
           content: [{ type: "text", text: `${JSON.stringify({ agentId: started.agent.id, status: "running" })}\n\n${BACKGROUND_NOTE}` }],
