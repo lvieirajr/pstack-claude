@@ -18,18 +18,20 @@ pstack skills are written in Claude Code tool language (the `Skill` tool, the `A
 | Wait for a subagent result | `wait_agent` |
 | Free a finished subagent slot | `close_agent`, when the session exposes it. Some Codex hosts don't. |
 | Track tasks (the todolist; `TaskCreate` / `TaskUpdate`, or `TodoWrite` on Claude Code) | `update_plan` |
-| Ask the human a fixed-choice question (`AskUserQuestion`) | Ask in plain text and let the user answer. Codex has no structured-choice tool. |
+| Ask the human a fixed-choice question (`AskUserQuestion`) | Use a question tool when this host exposes one; otherwise ask in plain text and let the user answer. |
 
-Subagent dispatch needs `multi_agent` enabled. Add to `~/.codex/config.toml`:
+Use the tool schema and delegation policy exposed by the current host. For Codex sessions that read local configuration, the current [official subagent guidance](https://learn.chatgpt.com/docs/agent-configuration/subagents) uses this shape in `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`):
 
 ```toml
-[features]
-multi_agent = true
+[agents]
+enabled = true
 ```
 
-Without it, `spawn_agent` is unavailable and the fan-out skills (`interrogate`, `why`, `how`, `arena`, `reflect`) degrade to a single sequential pass. A required independent review does not degrade. It stays blocked, as poteto-mode's [Subagents](../SKILL.md#subagents) section says.
+The documented default is enabled. `max_concurrent_threads_per_session` in the same table controls the limit when explicitly configured; leave it unset to use the host default. A local setting does not grant permission to delegate or add tools a managed host withholds. The old `[features] multi_agent` snippet is not the current configuration guidance.
 
-Enabling `multi_agent` does not lift the host's thread limit. A thread-limit error from `spawn_agent` is a capacity error, not a rejected model slug, so the skills' fallback to another model does not apply. After the first capacity rejection, stop spawning. Close a finished agent with `close_agent` before you try again, and where the session has no `close_agent`, do not assume a finished agent's slot is free.
+When `spawn_agent` is unavailable or delegation is prohibited, the fan-out skills (`interrogate`, `why`, `how`, `arena`, `reflect`) may use a labelled sequential pass for exploration. A required independent review does not degrade. It stays blocked, as poteto-mode's [Subagents](../SKILL.md#subagents) section says.
+
+Enabling agents does not lift the host's thread limit. A thread-limit error from `spawn_agent` is a capacity error, not a rejected model slug, so the skills' fallback to another model does not apply. After the first capacity rejection, stop spawning. Close a finished agent with `close_agent` before you try again, and where the session has no `close_agent`, do not assume a finished agent's slot is free.
 
 ## Subagent policy
 

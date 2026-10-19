@@ -90,6 +90,7 @@ async function makeGitStack(directory: string): Promise<{
   git({ repo, args: ["init", "--initial-branch=main"] });
   git({ repo, args: ["config", "user.name", "Orch Test"] });
   git({ repo, args: ["config", "user.email", "orch@example.com"] });
+  git({ repo, args: ["config", "commit.gpgsign", "false"] });
   git({
     repo,
     args: ["remote", "add", "origin", `https://github.com/${FIXTURE_REPOSITORY}.git`],
