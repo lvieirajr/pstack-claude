@@ -52,6 +52,8 @@ Find each skill's instructions in the [skills tree](../plugins/pstack/skills/).
 
 ## Runtime support
 
+This section records the inherited port's setup and reported verification. The fork's [compatibility baseline](compatibility-baseline.md) distinguishes independently repeated checks, maintainer reports, and remaining gaps across the four roadmap targets. The dotfiles-managed `~/.agents` installation is a target contract, not an implemented installer yet.
+
 All runtimes share [one skills tree](../plugins/pstack/skills/). A skills-only installation includes the skills, scripts, agent references, and license notices. The Claude Code, Codex, and GitHub Copilot plugins also install automatic routing hooks, and the Pi package adds an extension that injects the same routing and supplies the subagent tools. Codex command shortcuts are separate.
 
 | Runtime | Setup and recorded verification |
@@ -106,18 +108,18 @@ The [CI installation check](../.github/workflows/ci.yml) uses the skills CLI to 
 
 The [native plugin manifest](../plugins/pstack/.codex-plugin/plugin.json) points to the shared skills directory and the Codex [SessionStart hook](../plugins/pstack/hooks/codex-hooks.json). The [marketplace catalog](../.agents/plugins/marketplace.json) lists `pstack` in the `pstack-claude` marketplace. Review and trust the hook through `/hooks`; Codex asks again when its definition changes.
 
-The [README installation](../README.md#codex) registers that catalog with `codex plugin marketplace add`, then installs the plugin with `codex plugin add`. These commands match the help output from `codex-cli 0.154.0-alpha.6.2`. A fresh native installation was not tested for this documentation change.
+The [README installation](../README.md#codex) registers that catalog with `codex plugin marketplace add`, then installs the plugin with `codex plugin add`. A fresh local-checkout installation and plugin listing passed on Codex CLI 0.163.0 with a disposable configuration directory. This checks installation, not model invocation or hook trust; see the [baseline verification record](compatibility-baseline.md#verification-record).
 
 OpenAI documents [marketplace registration and the plugin format](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli). If your CLI lacks `plugin add`, use the plugin browser after registering the marketplace, or use the [skills-only installation](#shared-skills-installation).
 
-Request `poteto-mode` by name or select its entry, such as `pstack:poteto-mode`. To enable parallel subagents:
+Request `poteto-mode` by name or select its entry, such as `pstack:poteto-mode`. The current [official subagent configuration](https://learn.chatgpt.com/docs/agent-configuration/subagents) uses this table in `$CODEX_HOME/config.toml` (default `~/.codex/config.toml`):
 
 ```toml
-[features]
-multi_agent = true
+[agents]
+enabled = true
 ```
 
-Add this setting to `~/.codex/config.toml` if subagents are disabled. Skills such as `arena`, `interrogate`, and `architect` use parallel agents. The [mapping](../plugins/pstack/skills/poteto-mode/references/codex-tools.md) describes a sequential fallback and translates Claude tool names, model defaults, and verification instructions.
+The documented default is enabled; the host still controls tool availability, permissions, and capacity. Skills such as `arena`, `interrogate`, and `architect` use parallel agents. The [mapping](../plugins/pstack/skills/poteto-mode/references/codex-tools.md) describes a labelled sequential fallback for exploration, keeps required independent reviews blocked when unavailable, and translates Claude tool names, model defaults, and verification instructions.
 
 For optional slash-command shortcuts, run this from the clone's root:
 

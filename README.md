@@ -4,6 +4,8 @@
 
 Lauren Tan's [pstack](https://github.com/cursor/plugins/tree/main/pstack) is an opinionated Cursor skill stack that improves agent outcomes. This is a port for Claude Code, Codex, Pi, GitHub Copilot and other agent harnesses. It tracks upstream and also carries named policy forks, each declared in [`tools/forks.json`](tools/forks.json).
 
+This fork is establishing parity across Copilot, Codex, OpenCode, and Pi through a dotfiles-managed `~/.agents` installation. The installer is planned in [issue #3](https://github.com/lvieirajr/pstack-claude/issues/3); the installation options below describe the inherited port. See the [compatibility baseline](docs/compatibility-baseline.md) for verified evidence, remaining gaps, and the installation contract.
+
 Tell `poteto-mode` your goal and it will invoke the correct workflow for the task. It keeps your code concise, simple and verified.
 
 For concurrency bugs and invariants that tests cannot reach, see the separate [agent-formal-verify](https://github.com/michael-denyer/agent-formal-verify) plugin, which adds TLA+ model checking and Lean proofs.

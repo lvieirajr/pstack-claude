@@ -2,7 +2,7 @@
 
 Thanks for helping out. This repo is a **port**, not an original work: the `skills/` tree tracks [upstream pstack](https://github.com/cursor/plugins/tree/main/pstack) and gets synced forward periodically. That one fact shapes most of what follows.
 
-[CONTEXT.md](CONTEXT.md) is the glossary for the terms below.
+[CONTEXT.md](CONTEXT.md) is the glossary for the terms below. The [compatibility baseline](docs/compatibility-baseline.md) records source revisions, evidence levels, supported test scopes, the dotfiles installation contract, and reproducible checks. Keep source inspection, fixtures, real runtime checks, and model-backed results distinct when reporting compatibility.
 
 ## The sync boundary
 
