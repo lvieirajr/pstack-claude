@@ -7,18 +7,19 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const cli = fileURLToPath(new URL('../plugins/pstack/skills/poteto-mode/scripts/resume.mjs', import.meta.url));
-function fixture(body) {
+function fixture(body, env = process.env) {
   // resume.mjs reports resolved paths; macOS tmpdir() sits behind the /var symlink.
   const project = realpathSync(mkdtempSync(join(tmpdir(), 'resume-project-')));
-  const git = (...args) => execFileSync('git', ['-C', project, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  const git = (...args) => execFileSync('git', ['-C', project, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], env }).trim();
   const run = (...args) => {
-    const result = spawnSync('node', [cli, ...args, '--project', project], { encoding: 'utf8' });
+    const result = spawnSync('node', [cli, ...args, '--project', project], { encoding: 'utf8', env });
     return { status: result.status, value: JSON.parse(result.stdout) };
   };
   try {
     git('init', '-b', 'main');
     git('config', 'user.name', 'Fixture');
     git('config', 'user.email', 'fixture@example.invalid');
+    git('config', 'commit.gpgsign', 'false');
     git('commit', '--allow-empty', '-m', 'Initial');
     body({ project, run, git });
   } finally { rmSync(project, { recursive: true, force: true }); }
@@ -42,6 +43,21 @@ test('a cold process finds all ordered artifacts using only project identity', (
   assert.equal(readFileSync(cold.value.checkpoint.artifacts[0].path, 'utf8'), questions);
   assert.equal(readFileSync(cold.value.checkpoint.note.path, 'utf8'), 'Start with [the questions](questions.md).\n');
 }));
+
+test("checkpoint round trip does not require the user's signing agent", () => {
+  const directory = mkdtempSync(join(tmpdir(), 'resume-signing-'));
+  const config = join(directory, 'gitconfig');
+  try {
+    writeFileSync(config, '[commit]\n  gpgsign = true\n[user]\n  useConfigOnly = true\n  signingkey = fixture-only\n[gpg]\n  program = pstack-fixture-signer-that-does-not-exist\n');
+    fixture(({ run }) => {
+      const saved = note(run);
+      assert.equal(run('publish', '--note', saved.note, '--artifact', saved.artifact).status, 0);
+      const restored = run('read');
+      assert.equal(restored.status, 0);
+      assert.equal(readFileSync(restored.value.checkpoint.artifacts[0].path, 'utf8'), saved.text);
+    }, { ...process.env, GIT_CONFIG_GLOBAL: config, GIT_CONFIG_NOSYSTEM: '1' });
+  } finally { rmSync(directory, { recursive: true, force: true }); }
+});
 
 test('publishes a note linking an artifact with a parenthesized angle-bracket destination', () => fixture(({ run }) => {
   const directory = run('begin').value.directory;

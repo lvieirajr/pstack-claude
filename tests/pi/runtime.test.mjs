@@ -19,6 +19,7 @@ describe.skipIf(!piDir || noNode)("installed Pi child startup", () => {
       const { w, pi, ctx } = setup({ ctx: { model: null } });
       if (installed) writeFileSync(join(w.agentDir, "settings.json"), JSON.stringify({ packages: [join(import.meta.dir, "../..")] }));
       execFileSync("git", ["init", "-b", "main", w.cwd], { stdio: "ignore" });
+      execFileSync("git", ["-C", w.cwd, "config", "commit.gpgsign", "false"], { stdio: "ignore" });
       execFileSync("git", ["-C", w.cwd, "-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "--allow-empty", "-m", "base"], { stdio: "ignore" });
       // Isolate Pi's configuration without modifying the test runner's environment.
       const config = join(w.agentDir, "environment.mjs");

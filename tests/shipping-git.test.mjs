@@ -23,6 +23,7 @@ function fixture(body) {
     run(root, 'init', '-b', 'main');
     run(root, 'config', 'user.email', 'fixture@example.invalid');
     run(root, 'config', 'user.name', 'Fixture');
+    run(root, 'config', 'commit.gpgsign', 'false');
     const commit = (file, content) => {
       writeFileSync(join(root, file), content);
       run(root, 'add', file);

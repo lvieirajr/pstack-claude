@@ -199,6 +199,7 @@ export function gitRepo(dir) {
   run("init", "-q", "-b", "main");
   run("config", "user.email", "t@example.com");
   run("config", "user.name", "t");
+  run("config", "commit.gpgsign", "false");
   writeFileSync(join(dir, "README"), "x\n");
   run("add", "README");
   run("commit", "-q", "-m", "init");

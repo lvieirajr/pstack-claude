@@ -120,7 +120,7 @@ afterEach(() => {
 });
 
 const git = (...args) =>
-  execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+  execFileSync("git", ["-c", "commit.gpgsign=false", ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
 
 function commit(worktree, message, content = `${message}\n`) {
   const file = `${message.replaceAll(" ", "-")}.txt`;
