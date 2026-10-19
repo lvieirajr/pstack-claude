@@ -2,7 +2,6 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { type Static, Type } from "typebox";
 import { Value } from "typebox/value";
 
@@ -91,12 +90,12 @@ export function readSheet(agentDir: string): Sheet | undefined {
 const modelsConfig = Type.Object({
   available: Type.Array(Type.String()),
   efforts: Type.Array(Type.String()),
-  pi: Type.Object({ models: Type.Record(Type.String(), Type.Record(Type.String(), Type.String())) }),
+  pi: Type.Object({ fallback: Type.String(), models: Type.Record(Type.String(), Type.Record(Type.String(), Type.String())) }),
 });
 
 function readModels(modelsFile: string): Static<typeof modelsConfig> {
   const raw: unknown = JSON.parse(readFileSync(modelsFile, "utf8"));
-  if (!Value.Check(modelsConfig, raw)) throw new Error(`${modelsFile} is not a pstack models file: it needs available[], efforts[] and pi.models.`);
+  if (!Value.Check(modelsConfig, raw)) throw new Error(`${modelsFile} is not a pstack models file: it needs available[], efforts[] and pi.{fallback, models}.`);
   return raw;
 }
 
@@ -115,41 +114,15 @@ export function resolveModel(
     const valid = [...models.available, ...PARENT_MODEL_ALIASES, "<provider>/<model-id>"];
     throw new Error(`Unknown model "${requested}". Valid values: ${valid.join(", ")}.`);
   }
-  // An explicit mapping may cross providers; a default alias may not.
+  // Family names follow the provider the session is signed in to, so a ChatGPT
+  // subscription gets OpenAI models without any configuration.
   const provider = parentModel?.split("/")[0] ?? "";
-  const table = Object.hasOwn(models.pi.models, provider) ? models.pi.models[provider] : undefined;
-  const id = sheet?.piModels.get(requested) ?? table?.[requested];
+  const table = models.pi.models[Object.hasOwn(models.pi.models, provider) ? provider : models.pi.fallback];
+  const id = sheet?.piModels.get(requested) ?? table[requested];
   if (!id) {
-    throw new Error(`No Pi model mapped for "${requested}" on ${provider ? `provider "${provider}"` : "a session with no selected model"}: add a "pi models: ${requested}=<provider>/<id>" line to pstack-models.md, or use inherit-parent for an ordinary role.`);
+    throw new Error(`No Pi model mapped for "${requested}": add a "pi models: ${requested}=<provider>/<id>" line to the override sheet.`);
   }
   return id;
-}
-
-// Check the active Pi registry before starting a child. Pi otherwise clamps an
-// unsupported thinking level, which would silently change an explicit request.
-export async function validateModel(model: string | undefined, thinking: string | undefined, ctx: Pick<ExtensionContext, "modelRegistry">, signal?: AbortSignal): Promise<void> {
-  if (!model) {
-    if (thinking) throw new Error(`Cannot validate thinking level "${thinking}" without a selected Pi model. Select a model first.`);
-    return;
-  }
-  const slash = model.indexOf("/");
-  const selected = ctx.modelRegistry.find(model.slice(0, slash), model.slice(slash + 1));
-  if (slash < 1 || !selected) throw new Error(`Unknown Pi model "${model}". Run pi --list-models and update pstack-models.md with an available provider/id.`);
-  if (!ctx.modelRegistry.hasConfiguredAuth(selected)) {
-    // Dynamic credentials and providers without keys may only be visible to
-    // Pi's live availability check, as in one-shot's run preflight.
-    const available = await ctx.modelRegistry.getAvailableOfType("chat", selected.provider, { signal });
-    if (!available.length) throw new Error(`No configured Pi credentials for "${selected.provider}". Configure that provider in Pi or choose an available model in pstack-models.md.`);
-  }
-  if (!thinking) return;
-  // Pi 1.1's model metadata marks unsupported levels null; xhigh and max
-  // additionally require an explicit mapping. Non-reasoning models use off.
-  const levels: Record<string, string | null | undefined> = selected.thinkingLevelMap ?? {};
-  const supported = !selected.reasoning
-    ? thinking === "off"
-    : ["off", "minimal", "low", "medium", "high", "xhigh", "max"].includes(thinking) &&
-      levels[thinking] !== null && (!["xhigh", "max"].includes(thinking) || levels[thinking] !== undefined);
-  if (!supported) throw new Error(`Pi model "${model}" does not support thinking level "${thinking}". Choose a supported effort or another model in pstack-models.md.`);
 }
 
 export const GENERAL_PURPOSE = "general-purpose";

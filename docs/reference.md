@@ -52,7 +52,7 @@ Find each skill's instructions in the [skills tree](../plugins/pstack/skills/).
 
 ## Runtime support
 
-This section records the inherited port's setup and reported verification. The fork's [compatibility baseline](compatibility-baseline.md) distinguishes independently repeated checks, maintainer reports, and remaining gaps across the four roadmap targets. The dotfiles-managed `~/.agents` installation is a target contract, not an implemented installer yet.
+This section records the inherited port's setup and reported verification. The fork's [compatibility baseline](compatibility-baseline.md) distinguishes independently repeated checks, maintainer reports, and remaining gaps for Claude Code and Codex, alongside historical research for other harnesses. Claude Code and Codex use the native plugin installation commands in the [README](../README.md#install). Dotfiles may invoke those commands; each harness owns its installation and model configuration. Native registration and workflow verification remain distinct.
 
 All runtimes share [one skills tree](../plugins/pstack/skills/). A skills-only installation includes the skills, scripts, agent references, and license notices. The Claude Code, Codex, and GitHub Copilot plugins also install automatic routing hooks, and the Pi package adds an extension that injects the same routing and supplies the subagent tools. Codex command shortcuts are separate.
 

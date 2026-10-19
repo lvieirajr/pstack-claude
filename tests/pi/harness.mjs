@@ -18,6 +18,7 @@ const fixtureModels = {
   available: ["opus", "fable", "sonnet", "haiku"],
   efforts: ["low", "medium", "high", "xhigh", "max"],
   pi: {
+    fallback: "anthropic",
     models: {
       anthropic: {
         opus: "anthropic/fixture-opus",
@@ -82,10 +83,6 @@ export function fakeCtx({ cwd, entries = [], model = { provider: "anthropic", id
     ui,
     model,
     modelRegistry: {
-      find: (provider, id) => {
-        const known = [...Object.values(fixtureModels.pi.models).flatMap(Object.values), "openai/sheet-sonnet", "openai/sheet-haiku", "anthropic/sheet-haiku", "openai/gpt-x", model && `${model.provider}/${model.id}`];
-        return known.includes(`${provider}/${id}`) ? { provider, id, reasoning: true, thinkingLevelMap: { xhigh: "xhigh", max: "max" } } : undefined;
-      },
       hasConfiguredAuth: () => auth === "configured",
       getAvailableOfType: async () => (auth === "none" ? [] : [model]),
     },
@@ -202,7 +199,6 @@ export function gitRepo(dir) {
   run("init", "-q", "-b", "main");
   run("config", "user.email", "t@example.com");
   run("config", "user.name", "t");
-  run("config", "commit.gpgsign", "false");
   writeFileSync(join(dir, "README"), "x\n");
   run("add", "README");
   run("commit", "-q", "-m", "init");

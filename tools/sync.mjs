@@ -617,7 +617,7 @@ function main() {
     for (const c of report.conflicts) {
       if (c.reason === "removed-upstream") console.log(`  now port-only: ${spec.localPath}/${c.rel}`);
     }
-    console.log("next: resolve the conflict markers, review the diff, record the source revision and each now port-only file in the issue or commit, keep the inherited pstack-claude version, run bun tools/generate.mjs (it fails while a marker remains)");
+    console.log("next: resolve the conflict markers, review the diff, record the source revision and each now port-only file in the issue or commit, preserve the current VERSION until a planned release, run bun tools/generate.mjs (it fails while a marker remains)");
   } finally {
     rmSync(scratch, { recursive: true, force: true });
   }

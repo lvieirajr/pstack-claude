@@ -20,7 +20,7 @@ test("depth comes from the reader on each use and PI_CODING_AGENT_DIR moves the 
 test("an agent file's effort is checked against the efforts list in models.json", () => {
   const root = mkdtempSync(join(tmpdir(), "pstack-agents-"));
   try {
-    const models = { available: [], efforts: ["low"], pi: { models: {} } };
+    const models = { available: [], efforts: ["low"], pi: { fallback: "anthropic", models: {} } };
     writeFileSync(join(root, "models.json"), JSON.stringify(models));
     mkdirSync(join(root, "agents"));
     writeFileSync(join(root, "agents", "slow.md"), "---\neffort: low\n---\nbody\n");

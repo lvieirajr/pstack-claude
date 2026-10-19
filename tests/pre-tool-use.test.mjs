@@ -211,7 +211,7 @@ describe("PreToolUse model check for pstack agents", () => {
   });
 
   test("an all-alias sheet tells the agent to omit model", () => {
-    const reason = deny(runWith(sheet({ one: "auto", strong: "inherit-parent", panel: "inherit-parent", extra: "panel diversity: reduced\n" }), agent("gpt-5.5")).out);
+    const reason = deny(runWith(sheet({ one: "auto", strong: "inherit-parent", panel: "inherit-parent" }), agent("gpt-5.5")).out);
     expect(reason).toContain("without `model`");
   });
 

@@ -42,12 +42,12 @@ poteto-mode's Subagents section applies on Pi through the `agent` tool:
 - An agent's status follows its process. `completed` means the child exited, and `stop_agent` reports `stopped` only once the child has exited, so the Claude Code caveat about a `completed` agent that keeps running does not apply to the agent itself. Stopping an agent, like the session shutdown that stops every agent, ends the child pi and the `bash` command it still has running, because Pi kills that command's process tree on SIGTERM. A process that a finished `bash` command left in the background (`cmd &`, `nohup cmd`) runs in its own process group and outlives the agent; stop it yourself. A stopped agent's notice joins the conversation without starting a turn, since `stop_agent` already returned.
 - Agents belong to the session that started them. Quitting, reloading, and starting, resuming, or forking a session all stop every running agent, and a parent process that exits signals its agents to stop. On restore, an agent still running under its launching Pi process is left alone. An orphan whose process identity matches the saved record is signalled to stop, and remains unavailable to `send_message` and `stop_agent` until its process exits. Without enough identity data to signal it safely, its process is left alone and continuation is refused until its exit is confirmed. Only then is the restored agent marked `stopped` and allowed to resume.
 - `send_message` to a running agent is an RPC `steer` on the child's stdin. The agent reads it after its current tool calls, as on Claude Code, carries on in the same run, and sends one completion notice. A message the child rejects returns an error, and the agent keeps running. A message to a finished agent resumes its session in the background with the context of its earlier runs. A message that arrives after the agent settled but before its process exited resumes the agent once the process has exited.
-- A role value's `@<level>` picks the same effort agent as on Claude Code, and the extension passes its level to the child as `--thinking`. `session`, or an agent with no effort, inherits the parent's thinking level on the same model; a model switch uses that model's native default. The extension rejects unsupported explicit levels before launch instead of letting Pi clamp them.
+- A role value's `@<level>` picks the same effort agent as on Claude Code, and the extension passes its level to the child as `--thinking`. `session`, or an agent with no effort, runs the child at the parent's current thinking level.
 - Keep the rest of the policy unchanged. Pass file pointers not inlined context, give each worker its own worktree when they write, review every subagent's diff yourself.
 
 ## Model names
 
-Follow the [model selection contract](model-selection.md). Ordinary roles use `inherit-parent`, `auto`, or no `model`, so they run on the parent's current model. Explicit family aliases resolve only in the current provider's column. An unknown or absent parent provider has no fallback column:
+Skills name models by the Claude aliases in their Models sections. On Pi, pass the alias as the `agent` tool's `model`. The pstack extension resolves it in the column of the provider the session's current model comes from, and in the `anthropic` column for any other provider:
 
 | Alias | `anthropic` | `openai` | `openai-codex` |
 | --- | --- | --- | --- |
@@ -56,11 +56,11 @@ Follow the [model selection contract](model-selection.md). Ordinary roles use `i
 | `sonnet` | `anthropic/claude-sonnet-5-5` | `openai/gpt-6-sol` | `openai-codex/gpt-6-sol` |
 | `haiku` | `anthropic/claude-haiku-5-5` | `openai/gpt-6-luna` | `openai-codex/gpt-6-luna` |
 
-A `pi models: opus=<provider/id>, sonnet=<provider/id>` line in the Pi sheet explicitly remaps aliases, including across providers. A full `provider/id` is also an explicit choice. The extension checks the resolved ID and configured credentials against Pi's active registry before launching a child. An unmapped alias, unknown model, or missing credentials fails with configuration instructions; it never silently selects another provider.
+Pi warns that Anthropic bills Claude used through Pi per token, as extra usage, even on a Claude subscription. Pi shows that warning only in interactive mode, never for the `pi --mode rpc` children the `agent` tool runs.
 
-Pi bills Claude per token as extra usage even on a Claude subscription. Its interactive warning does not appear for RPC children. Only select that provider deliberately.
+A `pi models: opus=<provider/id>, sonnet=<provider/id>` line in the Pi override sheet points each alias it names at another Pi model, whatever the session's provider. Add one when the session's provider has no column above and Pi has no credentials for `anthropic`, because each alias then resolves to an `anthropic/*` ID and the `agent` call fails with `No API key found for anthropic`. The `agent` tool also takes a full `provider/id`, passed through unchanged, and `inherit-parent`, `auto`, or no `model` runs the child on the parent's current model. Diverse-model panels (`arena`, `architect`, `interrogate`, `how` critics, `reflect`) stay diverse only while their aliases resolve to distinct models. If one model family is all you can reach, vary the reasoning effort and note in the verdict that diversity was reduced.
 
-Keep panels on distinct resolved models. Aliases mapped to one model or varied reasoning effort do not satisfy model diversity. `/setup-pstack` lists Pi's available models and records explicit choices.
+`/setup-pstack` writes the configured model list. On Pi, keep the aliases and remap them with `pi models:`.
 
 ## Session routing
 

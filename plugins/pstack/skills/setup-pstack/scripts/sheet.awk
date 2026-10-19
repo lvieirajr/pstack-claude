@@ -100,13 +100,12 @@ function sheet_value(line) {
 # sheet as "; "-separated problems, or "" when it is well formed: a missing
 # role, an entry that is not inherit-parent, auto, or a model ID with an
 # optional effort, a default effort that is not session or a level, or a panel
-# without two explicit distinct IDs unless reduced diversity is recorded, or
 # with models from fewer than two vendors without a `panel vendors: any` line.
 # A problem quotes no unchecked sheet text, since the hook adds it to the
 # session context.
 # On success, SHEET_MODELS is the model set, MODEL_LIST its display list of
 # explicit IDs, and MODEL_ALIASES records whether any role inherits its model.
-function sheet_problems(    roles, panel, n, want, any, i, key, out, E, m, j, e, V, nv, vl, real, D, nd) {
+function sheet_problems(    roles, panel, n, want, any, i, key, out, E, m, j, e, V, nv, vl, real) {
   n = sheet_roles(roles, panel)
   split("", want)
   for (i = 1; i <= n; i++) want[roles[i]] = 1
@@ -114,13 +113,11 @@ function sheet_problems(    roles, panel, n, want, any, i, key, out, E, m, j, e,
   split("", SHEET_MODELS)
   MODEL_LIST = ""
   MODEL_ALIASES = 0
-  PANEL_REDUCED = 0
   any = 0
   for (i = 1; i <= SHEET_N; i++) {
     key = sheet_key(SHEET[i])
     if (key in want || key == "default effort") VALUE[key] = sheet_value(SHEET[i])
     else if (key == "panel vendors" && sheet_value(SHEET[i]) == "any") any = 1
-    else if (key == "panel diversity" && sheet_value(SHEET[i]) == "reduced") PANEL_REDUCED = 1
   }
   out = ""
   for (i = 1; i <= n; i++) if (!(roles[i] in VALUE)) out = out "; missing role `" roles[i] "`"
@@ -133,8 +130,6 @@ function sheet_problems(    roles, panel, n, want, any, i, key, out, E, m, j, e,
     m = split(VALUE[key], E, ",")
     if (m == 0) out = out "; no model in `" key "`"
     split("", V)
-    split("", D)
-    nd = 0
     nv = 0
     vl = ""
     real = 0
@@ -146,14 +141,12 @@ function sheet_problems(    roles, panel, n, want, any, i, key, out, E, m, j, e,
       if (!(e in SHEET_MODELS)) MODEL_LIST = MODEL_LIST (MODEL_LIST == "" ? "" : ", ") "`" e "`"
       SHEET_MODELS[e] = 1
       real = 1
-      if (!(e in D)) { D[e] = 1; nd++ }
       if (!(sheet_vendor(e) in V)) {
         V[sheet_vendor(e)] = 1
         nv++
         vl = vl (vl == "" ? "" : ", ") sheet_vendor(e)
       }
     }
-    if ((key in panel) && nd < 2 && !PANEL_REDUCED) out = out "; `" key "` needs at least two distinct model IDs (or explicit panel diversity: reduced)"
     if ((key in panel) && real && nv < 2 && !any) out = out "; `" key "` has models from one vendor (" vl ")"
   }
   return substr(out, 3)

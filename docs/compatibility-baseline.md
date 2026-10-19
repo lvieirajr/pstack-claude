@@ -2,7 +2,7 @@
 
 This is the starting contract for [issue #1](https://github.com/lvieirajr/pstack-claude/issues/1), recorded on 2026-10-18. It describes the reviewed implementation and the evidence available for it. It is not a claim that every workflow already works in every harness.
 
-The target runtimes are GitHub Copilot CLI and app, Codex, OpenCode, and Pi. Copilot in VS Code is a separate integration and has not been evaluated here. Existing Claude Code support remains part of the upstream port; it is not an additional target for this roadmap.
+The current targets are **Claude Code and Codex only**. The original four-harness roadmap and research below are historical evidence. The scope was narrowed on 2026-10-19: personal changes for other harnesses are restored to the inherited `pstack-claude` baseline at `3cff27a2dda8ab0390e3db55f4190539c5b86759`. Their native code, mappings, hooks, tests, and shared model data remain inherited; Claude/Codex additions in shared skill files are explicitly scoped to those two harnesses. Archived research is retained and does not establish a current support commitment.
 
 ## Source and behavior baseline
 
@@ -81,23 +81,17 @@ Copilot CLI 1.0.92 has a maintainer-reported case where a cached computer-use ex
 
 Pi process recovery may require `/proc` or `ps` to identify orphan processes. A sandbox denying process inspection can prevent that guarantee. Its interactive timers do not imply durable jobs after exit. Worktree isolation does not isolate application ports, databases, browsers, or credentials.
 
-## Dotfiles installation contract
+## Native installation contract
 
-The primary target is a reproducible dotfiles-managed installation rooted in `~/.agents`, with user skills exposed at `~/.agents/skills`. The user confirms that the shared skills target is fresh/empty. Claude's and Codex's user-skill directories are intended to point to it; no migration of an existing skill collection is required.
+Claude Code and Codex install this fork through their existing marketplace/plugin commands. Dotfiles only invoke those commands after the CLIs and prerequisites are installed. Each harness owns its plugin files, caches, registration, updates, and removal. There is no custom installer, shared package checkout, skill-link manager, generated bridge, ownership manifest, or canonical pstack JSON configuration.
 
-The inspected dotfiles bootstrap copies into home using `rsync -av --force`. It does not use Stow or symlink the whole `~/.agents` directory. Its `.agents/skills` is empty, and `.claude`/`.codex` are ignored. On the inspected machine, the native Claude and Codex instruction files also point at the same `~/.agents/AGENTS.md`; treating them as separate files can accidentally mix runtime-specific settings.
+Install the complete native plugins, including their skills, supporting scripts, and hooks. Do not also expose pstack through shared skill links, which can duplicate discovery. Existing unrelated skills and shared instructions remain in place. Model choices use each harness's inherited native setup procedure.
 
-Issue #3 implements the installer and chooses its minimal concrete layout. This baseline sets the following requirements; it does not install anything:
+The native Claude and Codex instruction files on the inspected machine resolve to the same `~/.agents/AGENTS.md`. Model setup must account for these aliases; native installation does not make those instruction files independent. Never mix conflicting runtime-specific choices in that shared file. This cleanup does not run model setup or rewrite those instructions.
 
-1. Dotfiles select one explicit pstack source revision and one canonical non-secret configuration. A complete bundle must remain available, including skill references, scripts, agents, hooks, Pi extension, notices, and required assets.
-2. Exposing skill links is distinct from registering hooks, native agents, instructions, and extensions. Pi needs the extension; the other harnesses need their supported native bridges where the workflow depends on them. Do not claim those components load merely because skills appear.
-3. Native managers may require derived caches. They must derive from the selected source and expose their revision rather than becoming independently maintained installations. Avoid duplicate skill discovery when combining links and native registration.
-4. Setup/update/removal must be repeatable from a clean temporary agents root and must work independently of the current directory or a hard-coded developer Workspace path. Track ownership of managed entries rather than replacing the whole shared directory.
-5. Shared `AGENTS.md` instructions and user/repository precedence remain intact. Runtime-specific choices must not be appended as conflicting global instructions through aliases to the same file.
-6. Secrets, provider authentication, histories, worker state, logs, and runtime caches do not belong in versioned dotfiles. Project proof and verification skills remain project-scoped. Reuse the Git common-directory checkpoint store where appropriate.
-7. Missing native registration, prerequisites, credentials, permissions, or proof capabilities must be named before claiming the affected workflow can finish. A skills-only mode may be useful without qualifying as full parity.
+Issue #3 now covers the small dotfiles integration and native installation verification. The earlier managed-`~/.agents` design and its installer tests have been withdrawn. Verify clean native installation in disposable homes without running the machine bootstrap or changing the live home. Keep native hook trust and model-backed workflow checks separate from registration checks.
 
-Acceptance checks for issue #3 must cover clean setup, repeated setup, a pinned update/new skill, removal of managed entries, native registration, child-agent loading, custom roots, and collision handling. The actual installer, central settings, and runtime fixes belong to their linked roadmap issues.
+Keep inherited version **0.9.93** during development. The user will introduce this fork's own version for its first ready release. Claude's remote plugin updates rely on the declared version, so unchanged development metadata does not establish an automatic upgrade path between commits. Verify versioned updates before that first release.
 
 ## Reproduce the code baseline
 

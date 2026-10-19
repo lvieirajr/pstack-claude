@@ -1,9 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
-
-import { validateModel } from "../../plugins/pstack/pi/config.ts";
 
 import { findPiPackage, piDependency } from "../../tools/pi-package.mjs";
 
@@ -16,7 +13,7 @@ function installedCatalog() {
   const piAi = piDependency(piDir, "@earendil-works/pi-ai");
   const dir = piAi && join(piAi, "dist/providers/data");
   if (!dir || !existsSync(dir)) return null;
-  return { dir, piAi, version: JSON.parse(readFileSync(join(piAi, "package.json"), "utf8")).version };
+  return { dir, version: JSON.parse(readFileSync(join(piAi, "package.json"), "utf8")).version };
 }
 
 function catalogIds(dir, provider) {
@@ -44,24 +41,4 @@ describe("models.json pi block", () => {
     );
     expect(missing).toEqual([]);
   });
-});
-
-test.skipIf(!catalog && !required)("model thinking validation matches the installed Pi SDK for every shipped model", async () => {
-  if (!catalog) throw new Error("Set PI_PACKAGE_DIR to the installed pi-coding-agent package.");
-  const { getSupportedThinkingLevels } = await import(pathToFileURL(join(catalog.piAi, "dist/models.js")).href);
-  for (const [provider, table] of Object.entries(piModels)) {
-    const groups = JSON.parse(readFileSync(join(catalog.dir, `${provider}.json`), "utf8"));
-    const entries = Object.values(groups).flatMap(Object.values);
-    for (const ref of Object.values(table)) {
-      const model = entries.find((m) => `${m.provider}/${m.id}` === ref);
-      expect(model).toBeDefined();
-      const ctx = { modelRegistry: { find: () => model, hasConfiguredAuth: () => true } };
-      const supported = getSupportedThinkingLevels(model);
-      for (const level of ["off", "minimal", "low", "medium", "high", "xhigh", "max"]) {
-        const result = validateModel(ref, level, ctx);
-        if (supported.includes(level)) await expect(result).resolves.toBeUndefined();
-        else await expect(result).rejects.toThrow("does not support thinking level");
-      }
-    }
-  }
 });

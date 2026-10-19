@@ -18,18 +18,11 @@ const models = loadModels();
 
 describe("committed models.json", () => {
   test("the pi block gives every available alias a Pi model on anthropic, openai, and openai-codex", () => {
-    expect(raw.pi).not.toHaveProperty("fallback");
+    expect(raw.pi.fallback).toBe("anthropic");
     expect(Object.keys(raw.pi.models).sort()).toEqual(["anthropic", "openai", "openai-codex"]);
     for (const table of Object.values(raw.pi.models)) {
       expect(Object.keys(table).sort()).toEqual([...models.available].sort());
     }
-  });
-
-  test("ordinary roles inherit the parent model instead of selecting a vendor", () => {
-    expect(raw.tiers.default).toBe("inherit-parent");
-    expect(raw.tiers.worker).toBe("inherit-parent");
-    expect(raw.codex.default).toBe("inherit-parent");
-    expect(raw.codex.worker).toBe("inherit-parent");
   });
 
   test("available models are the names the Claude Code Agent tool accepts", () => {
@@ -130,19 +123,6 @@ describe("parseModels", () => {
     expect(parse((p) => (p.codex.panel = panel))).toThrow('codex "panel" needs at least two explicit models');
   });
 
-  test("Pi aliases cannot disguise a default panel that resolves to one model", () => {
-    expect(parse((p) => {
-      for (const alias of p.available) p.pi.models.anthropic[alias] = "anthropic/one-model";
-    })).toThrow("pi.models.anthropic panel resolves to fewer than two distinct model IDs");
-  });
-
-  test.each(["inherit-parent", "auto"])("an unresolved %s alias cannot supply a second distinct Pi panel model", (parent) => {
-    expect(parse((p) => {
-      p.tiers.panel = ["opus", "sonnet", parent];
-      for (const alias of p.available) p.pi.models.anthropic[alias] = "anthropic/one-model";
-    })).toThrow("pi.models.anthropic panel resolves to fewer than two distinct model IDs");
-  });
-
   test("a two-model panel keeps its cardinality through tier resolution", () => {
     const policy = structuredClone(raw);
     policy.tiers.panel = ["opus", "sonnet"];
@@ -166,8 +146,8 @@ describe("parseModels", () => {
   test("each pi provider table must map exactly the available aliases to that provider's models", () => {
     expect(parse((p) => delete p.pi)).toThrow('models.json: "pi" must be an object');
     expect(parse((p) => delete p.pi.models)).toThrow('models.json: pi needs a "models" object');
-    expect(parse((p) => (p.pi.extra = 1))).toThrow('models.json: pi names "extra"; its only key is "models"');
-    expect(parse((p) => (p.pi.fallback = "anthropic"))).toThrow('models.json: pi names "fallback"; its only key is "models"');
+    expect(parse((p) => (p.pi.extra = 1))).toThrow('models.json: pi names "extra"; its keys are "fallback" and "models"');
+    expect(parse((p) => (p.pi.fallback = "google"))).toThrow('models.json: pi.fallback "google" is not a provider in pi.models');
     expect(parse((p) => (p.pi.models.openai = "openai/gpt"))).toThrow("models.json: pi.models.openai must be an object");
     expect(parse((p) => delete p.pi.models["openai-codex"].haiku)).toThrow(
       'models.json: pi.models.openai-codex has no Pi model for "haiku"',
