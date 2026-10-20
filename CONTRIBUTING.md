@@ -78,15 +78,7 @@ bunx prettier@3.6.2 --check .
 
 The scripts use Prettier 3.6.2 at upstream's settings in `.prettierrc.json`, CI runs the same check, and `.prettierignore` names each file the check skips and why.
 
-Use the Claude Code/Codex live PR tests below instead of the inherited `watch-pr/live-merge-safety.mjs` probe, which deletes its fixture repository. The replacement tests leave repositories for manual cleanup and require no repository-deletion access.
-
-Claude Code/Codex PR workflow checks are opt-in and separate from ordinary CI:
-
-- `PSTACK_NATIVE_PR=1 bun test tests/native-pr-workflow.test.mjs` uses installed CLIs with a scripted provider and local forge.
-- `PSTACK_MODEL_PR=1 bun test tests/model-pr-gates.test.mjs` makes paid model calls for hold checks.
-- `PSTACK_MODEL_PR_WORKFLOW=1 bun test tests/model-pr-workflow.test.mjs` uses paid models for authoring, independent verification, and authorized landing against a local forge and Git destination.
-- `PSTACK_LIVE_PR=1 bun test tests/live-pr-workflow.test.mjs` runs actual GitHub Actions with scripted tool sequences and a paid independent native-model verifier. It requires existing `repo` and `workflow` scopes and prints the retained repository URL for manual cleanup. Fixtures default to private; public synthetic fixtures require explicit approval and `PSTACK_LIVE_PR_VISIBILITY=public`.
-- `PSTACK_LIVE_PR_SAFETY=1 bun test tests/live-pr-safety.test.mjs` checks stack, service gates, and stop/resume against retained fixtures. `PSTACK_LIVE_PR_REPOSITORIES` names a JSON file mapping `claude` and `codex` to their saved repository record paths; set the matching visibility with `PSTACK_LIVE_PR_VISIBILITY`.
+`watch-pr/live-merge-safety.mjs` is an inherited opt-in probe that deletes its fixture repository. It is not part of this fork's validation.
 
 If you touched a workflow, audit it before pushing:
 
@@ -109,12 +101,6 @@ uvx zizmor@1.29.0 --persona pedantic --min-severity low --collect all -- .
 - **A workflow file that fails `actionlint`.** Invalid YAML, a malformed expression, an unknown runner label, or a `needs:` pointing at a job that does not exist. Run `actionlint` from the repository root.
 - **A Markdown correctness error.** Reversed link syntax, an empty link target, a missing image alt, a fragment link to a heading that is not there, or an undefined or unused reference definition. The rule set is deliberately correctness-only and lives in `.markdownlint-cli2.jsonc`. Run `npx --yes markdownlint-cli2@0.18.1 '**/*.md'`.
 - **A broken relative link in any Markdown file.** The link job resolves file and fragment targets offline and never touches a remote URL, so external link rot cannot fail your PR. Run `lychee --offline --include-fragments --exclude-path node_modules --exclude-path .git '**/*.md'`.
-
-The opt-in Claude/Codex live-verification fixture requires Node.js with `node:sqlite` and a dedicated `chrome-headless-shell` executable. It uses installed CLIs with a scripted local provider:
-
-```shell
-PSTACK_BROWSER=/path/to/chrome-headless-shell PSTACK_LIVE_VERIFICATION=1 bun test tests/live-verification.test.mjs
-```
 
 ## Dependency updates
 

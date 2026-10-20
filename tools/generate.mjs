@@ -582,9 +582,6 @@ export function parseModels(raw, skillExists) {
   for (const [tier, value] of Object.entries(raw.tiers)) {
     const slugs = [value].flat();
     unique(slugs, `tier "${tier}"`);
-    if (tier === "panel" && (!Array.isArray(value) || slugs.filter((s) => !["inherit-parent", "auto"].includes(s)).length < 2)) {
-      fail('tier "panel" needs at least two explicit models');
-    }
     for (const slug of slugs) {
       if (!available.has(slug)) fail(`tier "${tier}" names "${slug}", which is not in available`);
     }
@@ -679,11 +676,8 @@ export function modelsSection(roles) {
   return (
     "Role defaults, stamped from `plugins/pstack/models.json` (edit there, rerun `tools/generate.mjs`). " +
     "A matching role line in the `pstack-models.md` override sheet overrides each at runtime; `/setup-pstack` writes it and lists its path per runtime.\n\n" +
-    "On Claude Code and Codex, follow the [model selection contract](../poteto-mode/references/model-selection.md). " +
-    "Its rules take precedence over this skill's default and fallback instructions: ordinary default/worker roles " +
-    "inherit the parent model unless explicitly configured; strongest-model and panel roles need confirmed native choices. " +
-    "Do not silently replace an unsupported model or reasoning choice. Repeated models or varied effort do not " +
-    "satisfy diverse-model review gates.\n\n" +
+    "On Claude Code and Codex, the [model selection contract](../poteto-mode/references/model-selection.md) " +
+    "overrides these shared defaults and fallbacks, including ordinary role inheritance and explicit panel/judgment choices.\n\n" +
     bullets
   );
 }
@@ -700,9 +694,8 @@ export function effortSection(levels, defaultEffort) {
     "at every level, and a model name is passed as `model`. " +
     "Pass the level as the dispatch's effort field and keep the `subagent_type` you would otherwise use. " +
     "That is `effort` on the Claude Code `Agent` call and `reasoning_effort` on Codex's `spawn_agent`. " +
-    "On Codex, use the native `reasoning_effort` selector only when exposed and supported; report an unavailable " +
-    "selector instead of ignoring the level. On Claude Code and Codex, `session` inherits effort on the same model " +
-    "and uses the selected model's native default after a switch. Follow the [model selection contract](../poteto-mode/references/model-selection.md)."
+    "On Claude Code and Codex, follow the [model selection contract](../poteto-mode/references/model-selection.md) " +
+    "for supported selectors and effort inheritance."
   );
 }
 

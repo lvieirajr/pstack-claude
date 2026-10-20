@@ -78,8 +78,8 @@ function checkCodexModels(codex, { raw, fail, unique }) {
 }
 
 // The pstack Pi extension resolves each Claude alias a skill names through the
-// table of the session's provider. Unknown providers need an explicit mapping;
-// every known table maps exactly the available aliases to that provider's models.
+// table of the session's provider, or the fallback table on any other provider,
+// so every table maps exactly the available aliases to that provider's models.
 function checkPiModels(pi, { raw, fail, isObject }) {
   for (const key of Object.keys(pi)) {
     if (key !== "fallback" && key !== "models") fail(`pi names "${key}"; its keys are "fallback" and "models"`);

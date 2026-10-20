@@ -21,10 +21,6 @@ A good target is a promise the code makes, where a break harms users and tests r
 
 Pick the tool that answers the question at the lowest cost: a model checker, a proof assistant, an SMT-backed verifier, or another tool. Whether events can happen in a bad order usually suits a model checker over a small model of the design, and TLA+ is the default for that in any language. Whether the code itself behaves for every input, as with memory safety, overflow, or a data-structure invariant, usually suits a verifier that runs on the code. If no verifier runs on this language, say so, and test the real code with generated inputs, not a hand model of the function. A property that must hold at every size, where a bound is not enough, can need a proof. Prefer a tool that the repo's developers can install and run, and tell the user why you chose it.
 
-## Claude Code and Codex prerequisites
-
-On Claude Code and Codex, confirm that shell execution, the chosen verifier, and its runtime dependencies are available; this plugin installs none of them. Record the verifier version and setup command in the generated skill, and write it in the current runtime's project-skill directory. If installation or execution is unavailable, report the missing prerequisite and hand off a draft without claiming verification succeeded.
-
 ## What makes it good
 
 - **True to the code.** Every part of the model or proof points to code that a reviewer can open. What the verification treats as one indivisible step is one indivisible step in the code. Names come from this repo.
