@@ -10,9 +10,9 @@ The current targets are **Claude Code and Codex only**. The original four-harnes
 | --- | --- | --- | --- |
 | Michael Denyer's port, inherited by this fork | `3cff27a2dda8ab0390e3db55f4190539c5b86759` | 0.9.93 | Starting implementation |
 | Lauren Tan's original, pinned by that port | `99743e9c151c8537cbbf1f98bb38f34ef3368453` | 0.15.25 | Mechanical translation and declared-fork comparison |
-| Original pstack snapshot reviewed for parity | `8838150c6b4829ea3c01782631213776d86df14a` | 0.15.27 | Reference behavior for this roadmap; synchronization is issue #4 |
+| Original pstack snapshot reviewed for parity | `8838150c6b4829ea3c01782631213776d86df14a` | 0.15.27 | Reference behavior for this roadmap; current pstack pin after issue #4 |
 
-The original local Jarvis copy at `933da29fe88f64e715d1a446fd1ce045b429e5ef` matched all 171 source files in the reviewed original snapshot. The port retained 53 of its 55 main skills, all 24 principles, and all 23 playbooks. There are 47 declared pstack file departures from the mechanically derived pin; this is not 47 separate policy changes.
+The original local Jarvis copy at `933da29fe88f64e715d1a446fd1ce045b429e5ef` matched all 171 source files in the reviewed original snapshot. At the inherited baseline, the port retained 53 of the 55 upstream skill directories (including all 24 principles) and all 23 playbooks, with 47 declared pstack file departures from its derived pin. Issue #4 imports the missing formal-verification skill and pins the reviewed v0.15.27 snapshot; only the Grok Bot UI skill remains excluded from those 55 upstream skill directories. The formal-verification prerequisites add one declared file fork. A file-fork count is not a count of separate policy changes.
 
 Preserve the original workflow's intent, scope, independent reviewers, real-surface proof, evidence, and user-authorized autonomy. Different native tool names are expected. Skipping a required reviewer, substituting the writer's self-review, or replacing required observed evidence with an unsupported summary does not establish parity.
 
@@ -21,7 +21,7 @@ Important existing differences remain explicit:
 - Full autopilot stops at an operator merge instead of allowing an authorized PR owner to merge. Other shipping paths can merge under their own conditions.
 - Native routing is enabled by default; model roles and state paths remain partly Claude-oriented.
 - Local worktrees replace Cursor cloud execution, without providing independent machines or services.
-- Grok Bot and Benny are excluded. The newer original's formal-verification skill is not bundled.
+- Grok Bot and Benny are excluded. The original's formal-verification skill is bundled after issue #4; its chosen verifier must be installed separately, and importing it does not establish a completed proof.
 - Stronger watcher, cleanup, and checkpoint safeguards are useful changes to assess individually, not reasons to revert the whole port.
 
 The [fork registry](../tools/forks.json) and [source pins](../tools/upstream.json) remain authoritative for code ownership. The archived [original audit](research/portability-audit.md), [171-file inventory](research/portability-inventory.md), and [port comparison](research/pstack-claude-comparison.md) preserve the research behind this baseline. Those reports describe their frozen snapshots, not the current working tree or completed roadmap tasks.
@@ -149,6 +149,26 @@ Fresh issue #1 checks on the local issue branch, based on the inherited revision
 | Documentation | Markdownlint 0.18.1 passed; lychee 0.24.2 offline local-file/fragment check passed |
 
 The new checkpoint regression publishes and reads an actual artifact with an unavailable global signing agent and no globally supplied fixture identity. This guards the reproduced setup failure without changing production signing behavior. The full root run retains platform-specific and model-backed skips; Copilot/OpenCode sessions, model-backed Pi workflows, live PR writes, and dotfiles deployment were not executed. Source-only and reported cells in the capability matrix remain unchanged by these code checks. No compatibility score or blanket end-to-end support is inferred from the passing counts.
+
+### Issue #4 source sync
+
+On 2026-10-19, issue #4 advances only the pstack component from `99743e9c151c8537cbbf1f98bb38f34ef3368453` (v0.15.25) to the reviewed `8838150c6b4829ea3c01782631213776d86df14a` (v0.15.27). The sync adds the formal-verification skill and updates seven existing skill files. Help and setup conflicts retain the port's native runtime procedures while incorporating the new formal-verification routing and setup offer. The other component pins and release metadata stay unchanged at their inherited values.
+
+| Check | Observed result |
+| --- | --- |
+| Root suite with temporary unsigned fixture Git settings | 1,259 pass, 40 skip, zero fail across 45 files |
+| Generator and skill validation | 89 generated files current; packaging, links, frontmatter, and hook checks passed; skill-creator validator passed for the added skill |
+| Pstack ownership audit at the new pin | 85 unchanged files, 48 declared forks; no conflicts, undeclared/stale forks, or denylist hits |
+| Other component ownership audits | cursor-team-kit: six unchanged files; thermos: four unchanged files and one declared fork; both passed |
+| Claude Code 2.1.292, native local-folder installation | Source changes available in the registered folder; 64 installed skill entrypoints match the working source |
+| Claude Code 2.1.292, native Git installation | Same-version `plugin update` kept 63 skills; native uninstall/install refreshed to 64 matching entrypoints, with one enabled registration |
+| Codex 0.163.0, native local-folder and Git installations | Native refresh/add produced 64 matching installed entrypoints and the new prompt stub, with one enabled registration |
+| Codex app-server `skills/list`, after Git refresh | 64 distinct pstack skills; new `pstack:create-formal-verification-skill` enabled and present once; no discovery errors |
+| Documentation | Markdownlint and offline local-file/fragment link checks passed |
+
+The native checks used disposable homes, a baseline source commit followed by the uncommitted working snapshot, and the actual CLIs. A temporary Git URL rewrite routed the Git-marketplace fixture to a local repository; nothing was published. Every installed skill entrypoint was compared byte for byte with the working source. The [development refresh procedure](reference.md#refresh-a-development-installation) records the native commands needed while the package version remains 0.9.93.
+
+These checks do not exercise remote GitHub fetching, live-home installation, model-backed skill invocation, native hook trust, verifier installation, or a completed formal proof. The imported skill requires the chosen verifier and its runtime dependencies; an unexecuted generated check remains a draft. Automated updates between versioned releases will be verified with the first ready release.
 
 ## Workflow acceptance scenarios
 

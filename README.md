@@ -8,7 +8,7 @@ This personal fork targets Claude Code and Codex using their normal plugin insta
 
 Tell `poteto-mode` your goal and it will invoke the correct workflow for the task. It keeps your code concise, simple and verified.
 
-For concurrency bugs and invariants that tests cannot reach, see the separate [agent-formal-verify](https://github.com/michael-denyer/agent-formal-verify) plugin, which adds TLA+ model checking and Lean proofs.
+For concurrency bugs and invariants that tests rarely reach, use the bundled [create-formal-verification-skill](plugins/pstack/skills/create-formal-verification-skill/SKILL.md). It chooses a verifier for the project and generates a repeatable check; the verifier and its runtime dependencies must be installed separately.
 
 ## Install
 

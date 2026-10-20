@@ -24,6 +24,12 @@
       "since": "0.9.10",
       "upstream": "not-proposed"
     },
+    "plugins/pstack/skills/create-formal-verification-skill/SKILL.md": {
+      "kind": "port-feature",
+      "why": "Documents shell execution and verifier toolchain prerequisites, native project-skill placement, and a draft outcome when verification cannot run, scoped to Claude Code and Codex.",
+      "since": "0.9.93",
+      "upstream": "not-proposed"
+    },
     "plugins/pstack/skills/create-verification-skill/SKILL.md": {
       "kind": "port-feature",
       "why": "Names the generated project skill verify so it replaces Claude Code's bundled user-only /verify and the playbooks can invoke it.",
@@ -32,7 +38,7 @@
     },
     "plugins/pstack/skills/poteto-help/SKILL.md": {
       "kind": "port-feature",
-      "why": "Routes installation, model-sheet loading, and persistent routing preferences to the current runtime's setup sources, gives installed playbooks precedence over upstream guides, and keeps the port's public skill loading, hidden principles, verification-skill naming, local-worker advice, driver and built-in equivalents, excluded make-bot-ui row, and orchestrate wording as prose changes in this fork.",
+      "why": "Routes installation, model-sheet loading, and persistent routing preferences to the current runtime's setup sources, gives installed playbooks precedence over upstream guides, and keeps the port's public skill loading, hidden principles, verification-skill naming, local-worker advice, driver and built-in equivalents, excluded make-bot-ui row, and orchestrate wording as prose changes in this fork. Claude Code and Codex help links use this personal fork's native installation instructions and public files.",
       "since": "0.9.71",
       "upstream": "not-proposed"
     },

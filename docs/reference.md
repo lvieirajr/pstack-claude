@@ -4,7 +4,7 @@ Start with the [README](../README.md) for installation and your first task.
 
 ## Slash commands
 
-The package includes 63 skill directories: 39 public skills and 24 `principle-*` references. Claude Code uses `/pstack:<name>`, and Pi uses `/skill:<name>`. In Codex, request a skill by name or install the [optional shortcuts](#codex) for the `/name` form below.
+The package includes 64 skill directories: 40 public skills and 24 `principle-*` references. Claude Code uses `/pstack:<name>`, and Pi uses `/skill:<name>`. In Codex, request a skill by name or install the [optional shortcuts](#codex) for the `/name` form below.
 
 Find each skill's instructions in the [skills tree](../plugins/pstack/skills/).
 
@@ -38,6 +38,7 @@ Find each skill's instructions in the [skills tree](../plugins/pstack/skills/).
 | `/unslop` | clean up writing by removing AI tells |
 | `/no-comments` | strip comments before review, fix the accepted findings, encode claimed constraints |
 | `/create-verification-skill` | generate a project-local verification skill and feature map |
+| `/create-formal-verification-skill` | generate a project-local formal-verification skill for a race, invariant, or other property tests rarely reach |
 | `/maintain-verification-skill` | re-sync a drifted verification skill and its feature map |
 | `/deslop` | deslop a diff before commit |
 | `/babysit` | monitor an open PR, fix CI/comments, keep it merge-ready |
@@ -158,6 +159,29 @@ Copilot lists only part of a large plugin's skills in its prompt, so some pstack
 
 [`tests/copilot-smoke.sh`](../tests/copilot-smoke.sh) installs the checkout into a throwaway `COPILOT_HOME` and checks installation, routing, `session hook: off`, agent dispatch with an explicit model, first-run setup, that setup writes no sheet without the user's answers and exactly the supplied IDs with them, and that saved choices and plugin files reach a session without `--allow-all-paths` or any path-access request, from each session's `events.jsonl` and the written sheet. It runs the setup checks once per model in `SMOKE_SETUP_MODELS`. It also checks the `PreToolUse` deny, a vendored script and `check-sheet.sh` run with no permission request, that an injected sheet line stays out of the context, that an invalid sheet yields `sheet invalid`, that each hook fires once, the merge with a second plugin's session-start context, a `-p` resume, and, on a pseudo-terminal through [`tests/copilot-tui.py`](../tests/copilot-tui.py), a slash-command first message and an interactive resume. It needs a signed-in `copilot` CLI, spends about twenty premium requests, and skips when `copilot` is missing. CI does not run it.
 
+## Refresh a development installation
+
+This fork keeps version 0.9.93 until its first ready release. In the issue #4 check on Claude Code 2.1.292, refreshing a Git marketplace and running `plugin update` retained the old plugin contents at the same version. To refresh an existing Git installation during development, use the native commands below after the changes have been pushed.
+
+For Claude Code, run in your terminal:
+
+```shell
+claude plugin marketplace update pstack-claude
+claude plugin uninstall pstack@pstack-claude
+claude plugin install pstack@pstack-claude
+```
+
+Start a new Claude session or run `/reload-plugins` afterward. A local-folder marketplace reads from that folder directly and does not need this reinstall.
+
+For Codex, refresh the Git marketplace and install its current contents:
+
+```shell
+codex plugin marketplace upgrade pstack-claude
+codex plugin add pstack@pstack-claude
+```
+
+Start a new Codex session afterward. Both procedures refreshed the installed skills from 63 to 64 in disposable configurations without adding a second enabled plugin registration. These checks used a local Git fixture through the native installers; remote GitHub fetching and a versioned release update remain separate checks. See the [verification record](compatibility-baseline.md#issue-4-source-sync).
+
 ## Configuration and dependencies
 
 Invoke [setup-pstack](../plugins/pstack/skills/setup-pstack/SKILL.md) to choose models for each role. It detects available models, confirms the choices, and writes an override sheet. Its [runtime table](../plugins/pstack/skills/setup-pstack/SKILL.md#other-runtimes) names the sheet path and loading mechanism for each runtime. Defaults live in [models.json](../plugins/pstack/models.json).
@@ -184,6 +208,8 @@ Those authoring workflows need `plugin-dev` for their guidance; other workflows 
 Playbooks use the runtime's task-tracking tools or an uncommitted `todo.md` checklist. For Claude Code, the repository documents `CLAUDE_CODE_ENABLE_TODO_TOOLS=1`; see [platform adaptation](../plugins/pstack/skills/poteto-mode/SKILL.md#platform-adaptation).
 
 Use [create-verification-skill](../plugins/pstack/skills/create-verification-skill/SKILL.md) to record how the agent should run and check your project, following the [driver policy](../plugins/pstack/skills/poteto-mode/SKILL.md#non-negotiables).
+
+Use [create-formal-verification-skill](../plugins/pstack/skills/create-formal-verification-skill/SKILL.md) for a model checker, proof, or other verifier tied to a concrete code property. On Claude Code and Codex, shell execution and the chosen verifier's toolchain are prerequisites, not plugin contents. The generated skill records the tool version, setup and run commands, bounds, assumptions, and a deliberately broken case that the check catches. Until those checks actually run, the output is a draft. The separately maintained `agent-formal-verify` plugin is optional and is not required by this bundled skill.
 
 ## Maintenance
 
@@ -227,7 +253,7 @@ CI also checks shell scripts, workflows, Markdown, relative links, and the bundl
 
 ### Port scope and attribution
 
-The skill tree is synced against upstream `99743e9` (v0.15.25). The thermos skills and agents are synced against `118e73b` (thermos 1.0.0).
+The skill tree is synced against upstream `8838150c6b4829ea3c01782631213776d86df14a` (v0.15.27). The thermos skills and agents are synced against `118e73b` (thermos 1.0.0).
 
 This repository ports Lauren Tan's pstack from Cursor to Claude Code and shares the skills with other runtimes. It includes six cursor-team-kit skills, the three thermos skills with their two review subagents, and an independently authored `babysit` skill. The port supplies Claude Code plugin registration and routing, Codex manifests and shortcuts, the Codex tool mapping, the Pi package, extension, and tool mapping, and the GitHub Copilot hooks and tool mapping.
 
