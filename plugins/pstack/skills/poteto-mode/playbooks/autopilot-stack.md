@@ -1,5 +1,7 @@
 ### Autopilot-stack
 
+On Claude Code and Codex, follow the [native PR workflow contract](../references/pr-workflows.md) for installed helpers, task authority, reviewer evidence, process handles, and interrupted or stopped landing. Other harnesses retain the inherited procedure.
+
 **You own the stack, never the landing. Hand the operator one linear stack of base-chained PRs to review and land.** **Autopilot-full** holds except for how verified work leaves. Each tick re-reads both playbooks from disk under the installed plugin, and this one wins where they differ.
 
 1. **Run Autopilot-full's owners, minus the landing.** Owners report STACK-READY in place of merge-ready. They never rebase onto another branch, trunk included, and never retarget, merge, close a PR, or arm auto-merge, because the root owns the chain's topology and the operator owns the landing. When an item depends on another, its owner branches from that item's branch, not from trunk.

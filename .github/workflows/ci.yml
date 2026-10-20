@@ -258,7 +258,8 @@ jobs:
   # the temp directory sits behind the /var link.
   macos-worktree-audit:
     name: macOS worktree audit
-    runs-on: macos-latest
+    # Hosted arm64 capacity prevented this fork's audit from acquiring a runner.
+    runs-on: macos-26-intel
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

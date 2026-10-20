@@ -163,7 +163,7 @@ export function fixture(runtime, repo, { codexModel = "gpt-6.1-sol" } = {}) {
 export async function nativeRun(
   f,
   control,
-  { childAction, codexSandbox = "workspace-write" } = {},
+  { childAction, codexSandbox = "workspace-write", parentPrompt } = {},
 ) {
   let index = 0,
     parentCall,
@@ -441,7 +441,8 @@ export async function nativeRun(
       "--allowedTools",
       "Read,Bash,Agent,SendMessage,TaskStop",
       "--",
-      "PSTACK_PARENT\nExercise the installed pstack delegation fixture with all ten required lanes, using native agents and separate worktrees. Explicit fixture model choices for this protocol are sonnet/haiku on Claude and gpt-6.1-sol/gpt-6-luna on Codex.",
+      parentPrompt ??
+        "PSTACK_PARENT\nExercise the installed pstack delegation fixture with all ten required lanes, using native agents and separate worktrees. Explicit fixture model choices for this protocol are sonnet/haiku on Claude and gpt-6.1-sol/gpt-6-luna on Codex.",
     ];
   } else {
     writeFileSync(
@@ -456,7 +457,8 @@ export async function nativeRun(
       codexSandbox,
       ...f.worktrees.flatMap((p) => ["--add-dir", p]),
       "--",
-      "PSTACK_PARENT\nExercise the installed pstack delegation fixture with all ten required lanes, using native agents and separate worktrees. Explicit fixture model choices are gpt-6.1-sol and gpt-6-luna.",
+      parentPrompt ??
+        "PSTACK_PARENT\nExercise the installed pstack delegation fixture with all ten required lanes, using native agents and separate worktrees. Explicit fixture model choices are gpt-6.1-sol and gpt-6-luna.",
     ];
   }
   const child = spawn(f.runtime, args, {
