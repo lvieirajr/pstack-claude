@@ -22,7 +22,7 @@ When a required diverse panel cannot run, name the missing models or unsupported
 
 | Harness | Model selection | Reasoning and limits |
 | --- | --- | --- |
-| Claude Code | Use the active `Agent` model enum; omit the override for inheritance. Do not convert an unsupported saved model into a different model automatically. | Use a supported effort agent only after checking the chosen model's supported levels. |
+| Claude Code | Use the active `Agent` model enum; omit the override for inheritance. Do not convert an unsupported saved model into a different model automatically. | Use the native `Agent` call's `effort` field on Claude Code 2.1.292 or later, after checking the chosen model's supported levels. |
 | Codex | Use the host's exposed model selector or an existing native agent configuration. Treat the examples in its mapping as examples. | Use `reasoning_effort` only when exposed and supported. If selecting model/effort requires a fresh agent context, supply that context explicitly. An unavailable selector or a conflicting native agent configuration needs configuration, not an ignored override. |
 
 Native behavior references: [Codex subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents). Inspect the active version and tool schema before relying on a selector.
