@@ -2,10 +2,6 @@
 
 This file is the release changelog, with one `## <version> - <title>` entry per release, newest first. The Cursor-to-Claude rewrite rules live in [`tools/substitutions.json`](tools/substitutions.json), and the [sync boundary](CONTRIBUTING.md#the-sync-boundary) in `CONTRIBUTING.md` defines how a change to upstream's skill content is declared.
 
-## Unreleased
-
-Sync original pstack to [`88d4751`](https://github.com/cursor/plugins/commit/88d47514b82e7c44f00f2b2a72ff6dd12158038c) (v0.15.29). `/sharpen` now names the expert approach, raw sources, methods, and outside check, then returns a rewritten prompt without doing the task. Help and recipes follow that behavior. The package version continues to follow pstack-claude at 0.9.95.
-
 ## 0.9.95 - Effort is a field on the dispatch
 
 An `@level` on a role now reaches the child as the dispatch's own effort field on every runtime: `effort` on the Claude Code `Agent` call, `reasoning_effort` on Codex's `spawn_agent` and Copilot's `task`, and `effort` on Pi's `agent` tool. The ten generated agents, `effort-<level>` and `poteto-agent-<level>`, are gone, and so is the `agents` list in the Claude Code plugin manifest. They existed only because the `Agent` call had no effort parameter, and Claude Code 2.1.292 added one. Without the list Claude Code registers the default `agents/` directory, so pstack's agent types are exactly the four under `agents/`: `comment-sicko`, `poteto-agent`, and the two thermo-nuclear subagents. The generator now fails if the manifest gains an `agents` list again. Claude Code 2.1.292 or later is required for `@level`.
