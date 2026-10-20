@@ -1,6 +1,6 @@
 ---
 name: sharpen
-description: aim a task at what you are really after, the way a top expert would, without overspecifying it
+description: deepen and rewrite a prompt before sending it, leaving your choices open; returns the prompt without doing the task
 disable-model-invocation: true
 ---
 
