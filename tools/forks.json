@@ -44,13 +44,13 @@
     },
     "plugins/pstack/skills/poteto-mode/SKILL.md": {
       "kind": "policy",
-      "why": "Adds the Claude Code, Codex, Pi, and GitHub Copilot Platform Adaptation section with its task-tool and todo.md fallback (per task slug when sessions share a checkout), the run-or-verify driver line, the deploy-platform and defect-severity triggers, the port's principle summaries, the project playbooks paragraph, and the closed-review-gate rule that the Codex and Pi mappings point to, and it points the Agent-call defaults at the Models section with full tool access and the namespaced pstack:poteto-agent name, requires stopping an abandoned agent before replacing it, renders every reply item as prose, layers technical-writing on top of unslop, and describes Autopilot-full as stopping at merge-ready for the operator's click.",
+      "why": "Adds the Claude Code, Codex, Pi, and GitHub Copilot Platform Adaptation section with its task-tool and todo.md fallback (per task slug when sessions share a checkout), the run-or-verify driver line, the deploy-platform and defect-severity triggers, the port's principle summaries, the project playbooks paragraph, and the closed-review-gate rule that the Codex and Pi mappings point to, and it points the Agent-call defaults at the Models section with full tool access and the namespaced pstack:poteto-agent name, requires stopping an abandoned agent before replacing it, renders every reply item as prose, layers technical-writing on top of unslop, and describes Autopilot-full as stopping at merge-ready for the operator's click. Personal fork issue #5 applies the installed autonomy contract only on Claude Code and Codex, where an explicitly authorized full-autopilot owner may merge and native user limits replace the inherited fixed ceilings.",
       "since": "0.9.2",
       "upstream": "not-proposed"
     },
     "plugins/pstack/skills/poteto-mode/playbooks/autopilot-full.md": {
       "kind": "policy",
-      "why": "Owners stop at merge-ready and the operator clicks every merge, with the patch-id rule governing re-verification if trunk moves first, instead of each owner merging after a clean verdict, and the root writes the program objective into standing orders on the go and re-reads it each tick, arms the tick as a dynamic-mode /loop, states the program's size before the first owner starts and waits for the operator's go above three owners, scopes review lanes to what the diff breaks, and stops a PR at two fix-forwards.",
+      "why": "Owners stop at merge-ready and the operator clicks every merge, with the patch-id rule governing re-verification if trunk moves first, instead of each owner merging after a clean verdict, and the root writes the program objective into standing orders on the go and re-reads it each tick, arms the tick as a dynamic-mode /loop, states the program's size before the first owner starts and waits for the operator's go above three owners, scopes review lanes to what the diff breaks, and stops a PR at two fix-forwards. Personal fork issue #5 scopes an override to Claude Code and Codex: owner merges require the actual user grant and all proof/repository gates, and the fixed size and fix-forward limits apply only when selected by user or repository instructions.",
       "since": "0.9.39",
       "upstream": "not-proposed"
     },
@@ -248,7 +248,7 @@
     },
     "plugins/pstack/skills/setup-pstack/SKILL.md": {
       "kind": "port-feature",
-      "why": "Writes the override sheet at each runtime's own path, loaded by @-include on Claude Code and pasted into AGENTS.md on Codex since neither has Cursor's always-applied rules, replaces Cursor's budget step with a default effort and per-role effort levels, adds the SessionStart hook toggle and names the Pi extension as a reader of it, lists every runtime's sheet path in a table, and routes GitHub Copilot to copilot.md. Personal fork issue #2 adds model-selection rules only for Claude Code and Codex, preserving the inherited procedures for other harnesses.",
+      "why": "Writes the override sheet at each runtime's own path, loaded by @-include on Claude Code and pasted into AGENTS.md on Codex since neither has Cursor's always-applied rules, replaces Cursor's budget step with a default effort and per-role effort levels, adds the SessionStart hook toggle and names the Pi extension as a reader of it, lists every runtime's sheet path in a table, and routes GitHub Copilot to copilot.md. Personal fork issue #2 adds model-selection rules only for Claude Code and Codex, preserving the inherited procedures for other harnesses. Issue #5 explains the separate routing choice and native instruction preferences for Claude Code and Codex without adding configuration fields.",
       "since": "0.9.2",
       "upstream": "not-proposed"
     },

@@ -47,6 +47,8 @@ Then ask for the default reasoning effort, the `default effort` line. It is `ses
 
 On Claude Code and Codex, the plugin's `SessionStart` hook injects the poteto-mode mandate on startup, resume, clear, and compact. Codex asks the user to trust plugin hooks through `/hooks` before running them. On Pi, the pstack extension adds the same mandate to the system prompt at every agent start. Ask whether to keep the hook. The default is on. The answer is the `session hook` line in the current runtime's sheet: `on` or `off`. With no sheet or no line, the hook injects. The line is inert on other runtimes.
 
+On Claude Code and Codex, explain that this choice controls the routing mandate, not merge authority or skill availability. For optional persistent review-before-merge or program limits, follow the [autonomy contract](../poteto-mode/references/autonomy.md#optional-preferences-use-native-instructions); use existing native instructions only when the user requests the preference.
+
 ### 5. Validate
 
 Every real slug written must be in the detected set. `inherit-parent` and `auto` always pass. Validate the slug without any `@<level>` suffix, and the level against the effort levels in [Models](#models). The `default effort` value is one of those levels or `session`. On Codex, the levels are the `reasoning_effort` values your Codex models accept instead. If a chosen real slug or level is not available, stop and ask again.

@@ -85,6 +85,8 @@ Read the leaf skill in full for any principle you apply. Each entry names when i
 
 ## Autonomy
 
+On Claude Code and Codex, first read the [autonomy contract](references/autonomy.md). It governs authorization and the full-autopilot exceptions to the inherited defaults below and the playbook catalog. Other harnesses retain the inherited rules.
+
 **Just do it.** Use any MCP tool. Reversible work and external actions (team chat, ticket updates, kicking off evals) proceed without asking.
 
 **Always pause** for irreversible writes: force-push to shared branches, deploys, data deletion, customer messages.

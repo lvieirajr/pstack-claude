@@ -18,7 +18,7 @@ Preserve the original workflow's intent, scope, independent reviewers, real-surf
 
 Important existing differences remain explicit:
 
-- Full autopilot stops at an operator merge instead of allowing an authorized PR owner to merge. Other shipping paths can merge under their own conditions.
+- On Claude Code and Codex, the installed [autonomy contract](../plugins/pstack/skills/poteto-mode/references/autonomy.md) restores an authorized full-autopilot owner-to-merge path while preserving independent proof, explicit user gates, and revision-safe shipping. The [policy audit](workflow-policy.md) records the retained differences and optional native instruction limits. Other harnesses retain the inherited operator-merge behavior.
 - Native routing is enabled by default; model roles and state paths remain partly Claude-oriented.
 - Local worktrees replace Cursor cloud execution, without providing independent machines or services.
 - Grok Bot and Benny are excluded. The original's formal-verification skill is bundled after issue #4; its chosen verifier must be installed separately, and importing it does not establish a completed proof.
@@ -169,6 +169,12 @@ On 2026-10-19, issue #4 advances only the pstack component from `99743e9c151c853
 The native checks used disposable homes, a baseline source commit followed by the uncommitted working snapshot, and the actual CLIs. A temporary Git URL rewrite routed the Git-marketplace fixture to a local repository; nothing was published. Every installed skill entrypoint was compared byte for byte with the working source. The [development refresh procedure](reference.md#refresh-a-development-installation) records the native commands needed while the package version remains 0.9.93.
 
 These checks do not exercise remote GitHub fetching, live-home installation, model-backed skill invocation, native hook trust, verifier installation, or a completed formal proof. The imported skill requires the chosen verifier and its runtime dependencies; an unexecuted generated check remains a draft. Automated updates between versioned releases will be verified with the first ready release.
+
+### Issue #5 workflow policy
+
+The [policy audit](workflow-policy.md) classifies all 48 pstack forks and the one thermos fork after issue #4. A Claude/Codex-only installed contract restores authorized full-autopilot merges and replaces the inherited fixed owner-count/retry gates with native user or repository limits. It preserves manual review requests, stops, independent review, real-surface proof, current-revision shipping checks, and the separate operator-landed stack workflow. Routing remains explicitly selectable through the inherited model-sheet setting.
+
+The root suite passed 1,265 tests with 40 skips and zero failures. Generation and the pstack ownership audit passed. Native Git-marketplace fixture installs on Claude Code 2.1.292 and Codex 0.163.0 carried the new contract and its entrypoint links, retained one enabled registration, preserved shared instruction symlinks and contents, and read on/off routing choices across fresh installed-hook processes. The [validation record](workflow-policy.md#issue-5-validation-record) distinguishes those checks from model-backed authorization, stop, independent-review, and actual merge scenarios, which were not executed.
 
 ## Workflow acceptance scenarios
 

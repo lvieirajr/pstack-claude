@@ -182,6 +182,12 @@ codex plugin add pstack@pstack-claude
 
 Start a new Codex session afterward. Both procedures refreshed the installed skills from 63 to 64 in disposable configurations without adding a second enabled plugin registration. These checks used a local Git fixture through the native installers; remote GitHub fetching and a versioned release update remain separate checks. See the [verification record](compatibility-baseline.md#issue-4-source-sync).
 
+## Autonomy and routing
+
+On Claude Code and Codex, [the installed autonomy contract](../plugins/pstack/skills/poteto-mode/references/autonomy.md) restores Lauren's full-autopilot owner-to-merge path when the user's grant covers landing. A manual review gate, concurrency limit, or fix-forward limit can be stated in the task or native `CLAUDE.md`/`AGENTS.md`; pstack adds no fixed three-owner approval or two-round ceiling on these two harnesses. Required independent review, real-surface proof, current-revision checks, and repository protections still apply. The separate Autopilot-stack workflow still leaves landing to the operator.
+
+`/setup-pstack` already offers the persistent `session hook: on/off` routing choice. Automatic routing remains an inherited, selectable difference from Lauren's invocation-based setup; turning it off removes the startup mandate while leaving skills available. Routing never grants merge authority. See the [fork-policy audit](workflow-policy.md) for retained differences and their source revisions.
+
 ## Configuration and dependencies
 
 Invoke [setup-pstack](../plugins/pstack/skills/setup-pstack/SKILL.md) to choose models for each role. It detects available models, confirms the choices, and writes an override sheet. Its [runtime table](../plugins/pstack/skills/setup-pstack/SKILL.md#other-runtimes) names the sheet path and loading mechanism for each runtime. Defaults live in [models.json](../plugins/pstack/models.json).
