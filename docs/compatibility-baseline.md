@@ -278,7 +278,7 @@ The fixture leaves its reported `pstack-live-<runtime>-*` evidence directory in 
 
 The installed [PR workflow contract](../plugins/pstack/skills/poteto-mode/references/pr-workflows.md) connects Lauren's opening-a-pr, Babysit, autopilot-full, autopilot-stack and Shipping playbooks to Claude Code and Codex. Five scoped pointers preserve the inherited procedures for other harnesses. The contract keeps separate grants for PR creation, babysitting, full-autopilot landing and operator-landed stacks, and covers native process polling, Git-directory permissions, revision/pending-request guards and stop/resume reconciliation.
 
-Version 0.9.93 and Lauren's pin `8838150c6b4829ea3c01782631213776d86df14a` are unchanged. No forge backend, installer, global configuration or shipping policy engine was added.
+Version 0.9.93 and Lauren's pin `8838150c6b4829ea3c01782631213776d86df14a` are unchanged. No forge backend, installer, global configuration or shipping policy engine was added. The GitHub macOS audit uses the standard `macos-26-intel` image after the hosted ARM job failed to acquire a runner; the audit and its checks are unchanged. Local Apple Silicon results remain a separate environment record.
 
 | Tier | Observed evidence | Boundary |
 | --- | --- | --- |
