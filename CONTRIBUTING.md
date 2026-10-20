@@ -106,6 +106,12 @@ uvx zizmor@1.29.0 --persona pedantic --min-severity low --collect all -- .
 - **A Markdown correctness error.** Reversed link syntax, an empty link target, a missing image alt, a fragment link to a heading that is not there, or an undefined or unused reference definition. The rule set is deliberately correctness-only and lives in `.markdownlint-cli2.jsonc`. Run `npx --yes markdownlint-cli2@0.18.1 '**/*.md'`.
 - **A broken relative link in any Markdown file.** The link job resolves file and fragment targets offline and never touches a remote URL, so external link rot cannot fail your PR. Run `lychee --offline --include-fragments --exclude-path node_modules --exclude-path .git '**/*.md'`.
 
+The Claude/Codex live-verification fixture is a separate opt-in tier. See the [verification record](docs/compatibility-baseline.md#issue-9-live-verification) for Node/browser prerequisites, native fixture permissions, retained evidence, and the difference between scripted provider checks and model-backed results:
+
+```shell
+PSTACK_BROWSER=/path/to/chrome-headless-shell PSTACK_LIVE_VERIFICATION=1 bun test tests/live-verification.test.mjs
+```
+
 ## Dependency updates
 
 Dependabot keeps the pinned action SHAs current. The vendored scripts' one runtime dependency (`commander`) follows upstream's pin and moves with `tools/sync.mjs`; `osv-scanner` scans every `bun.lock` weekly, so a CVE still surfaces. The root `bun.lock` pins `typebox`, which the generator and the Pi extension tests import. If you bump it by hand, run `bun install` and commit the resulting `bun.lock` in the same change.

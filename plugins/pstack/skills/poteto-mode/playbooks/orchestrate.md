@@ -4,6 +4,8 @@ Resolve the driver skill through [poteto-mode's Non-negotiables](../SKILL.md#non
 
 On Claude Code and Codex, follow the [native delegation contract](../references/delegation.md) for worker placement, capacity, stop confirmation, and recovery. Previously running workers have unknown status after a restart until reconciled, taking precedence over the dead-worker assumption below. Other harnesses retain the inherited procedure.
 
+On Claude Code and Codex, also follow the [live verification contract](../references/verification.md). Verification briefs own runtime resources beyond the worktree, name real-surface artifacts, and require coordinator inspection after cleanup. Other harnesses retain the inherited procedure.
+
 **You own the program, never the code. Author briefs, drain the queue, keep the frontier green, decide.** For a whole project handed to one standing coordinator chat: multi-day, many stacked PRs, dozens to hundreds of subagents, the human checking in twice a day instead of every five minutes. One task driven to a predicate is Autonomous run. One ambitious run needing a bespoke workflow is figure-it-out. Route here when the work outlives any single agent. Work one agent could finish inside the session's budget is not a program.
 
 Ceremony must scale with the program. On cheap near-identical units, collapse it as each section directs.

@@ -247,6 +247,33 @@ PSTACK_NATIVE_DELEGATION=1 bun test tests/native-delegation.test.mjs
 
 The suite strips ambient provider credentials/settings, uses disposable homes and a local Git source, supplies localhost responses, removes native fixture registrations, and deletes its temporary workspaces. Claude loads the registered installed plugin by its explicit native plugin directory. No real-home plugin installation, dotfiles change, or external model call is made by this suite.
 
+### Issue #9 live verification
+
+The [live verification contract](../plugins/pstack/skills/poteto-mode/references/verification.md) applies only to Claude Code and Codex. It adds project driver discovery, explicit native plan validation, surface-appropriate evidence, process/port/database/browser ownership, and coordinator inspection. The driver generator and maintainer, poteto-mode, multi-phase planning, and orchestration link to that contract. Other harnesses retain their inherited procedures.
+
+The comparison uses Lauren's existing v0.15.27 source pin, `8838150c6b4829ea3c01782631213776d86df14a`. Ten logical lanes remain the default, with capacity scheduling them separately. A different count requires a recorded user/repository decision and reason, checked by the coordinator. Native plans keep the configured worker routing, regression against trunk, unit/perf blocks, independent inspection, and operator gates. CLI/API operator review uses actual transcripts/responses and reproduction commands; interaction-gated UI review keeps screenshots and video. No universal resource manager, installer, dependency, model sheet, source pin, or version change was introduced.
+
+The inherited checker already accepts arbitrary backticked `Save` paths. The actual restrictions were its fixed lane count, screenshot-oriented template, and universal screenshot/video review-gate check. `check-plan.mjs <plan.md> --runtime claude|codex` now checks declared lanes, surfaces, artifact kinds, commands/tool actions, save paths and pass predicates. Its default invocation keeps the inherited skeleton contract. Neither mode executes the plan or authenticates a claimed decision or artifact.
+
+Verification on macOS with Bun 1.4.3 and Node.js 26.12.0 included these distinct tiers:
+
+- Native plan acceptance/rejection checks and the inherited plan/fence regressions pass. Tests cover CLI/API proof without screen media, UI media gates, missing/duplicate lanes, count-decision requirements, worker routing, missing fields, placeholders, and review-gate reasons.
+- Helper typecheck and all 258 helper tests pass. The final complete code-only root suite passed with 1,336 tests, 46 skips and zero failures across 50 files, with native live-test flags explicitly disabled. It includes all four browser preflight regression cases. The restricted root run hit the same eight inherited Pi process-inspection failures recorded in the original baseline; the complete unrestricted rerun passed. These process tests were not skipped or changed.
+- Before the final browser preflight change, two opt-in native checks passed on Claude Code 2.1.292 and Codex CLI 0.163.0. Each installs this branch through the native installer into a disposable home, reads the installed contract and project-local driver, and runs real CLI, HTTP, SQLite, Chrome, and CDP operations. Instances at separate worktrees use different bind-assigned ports, SQLite files, and browser profiles. Simultaneous API writes retain different values; after a rejected real request and instance A cleanup, B still works. The caller separately opens receipts, checks command exit statuses, request/response bodies, side effects, input heads, and cleanup. Rendered screenshots were also opened for visual inspection.
+- Evidence survives app-state teardown and fixture uninstall. Initial Codex attempts demonstrate the permission boundary: its default workspace sandbox denied a listener; enabling networking permitted CLI/API checks but Chrome aborted under macOS sandboxing. Those failed attempts retained their logs and removed owned state. The passing Codex browser fixture explicitly used `danger-full-access` in its disposable, credential-free session. This is test-only configuration, not a plugin default or advice to bypass a production restriction.
+
+The native tests use a scripted localhost model provider. They establish installed-tool execution and actual app/resource behavior, not model compliance with every instruction, automatic skill selection, every project's isolation, or full ten-lane workflow completion. Their two fixture instances test isolation rather than selecting a smaller production proof requirement. A host without the necessary networking/browser permission must retain blocked live proof or use an already authorized project driver. UI video capture is retained as a gate and is not claimed by this fixture.
+
+Reproduce this opt-in tier with installed Claude/Codex CLIs, Git, Bun, Node.js with `node:sqlite` and global WebSocket support, and an explicitly selected dedicated `chrome-headless-shell` or `headless_shell` executable. There is no automatic browser selection. Desktop Chrome is rejected before launch; `PSTACK_BROWSER` must name a separately installed dedicated headless shell. This tier grants the isolated Codex fixture browser-capable execution; it is not part of ordinary CI.
+
+```shell
+PSTACK_BROWSER=/path/to/chrome-headless-shell PSTACK_LIVE_VERIFICATION=1 bun test tests/live-verification.test.mjs
+```
+
+The earlier desktop Chrome runs produced actual CLI/API/UI evidence, but one sandboxed Chrome attempt crashed and triggered a macOS error dialog. After the user reported the pop-ups, all browser reruns stopped. The final preflight rejects desktop Chrome and missing browser configuration before installation or process launch; its four regression tests run without a browser. A live rerun with the newly required dedicated headless shell remains unverified. Do not read the earlier browser passes as validation of that final executable choice.
+
+The fixture leaves its reported `pstack-live-<runtime>-*` evidence directory in the system temporary directory. Its app state, browser profiles, owned processes, temporary workspaces, and native fixture registrations are removed. Live dotfiles, credentials, plugin registrations and settings are untouched.
+
 ## Workflow acceptance scenarios
 
 These are the live parity scenarios for later work, not tests that issue #1 claims to have executed:

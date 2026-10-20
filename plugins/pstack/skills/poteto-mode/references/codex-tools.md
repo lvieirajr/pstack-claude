@@ -65,7 +65,7 @@ A skills-only installation does not include plugin hooks. Request `poteto-mode` 
 
 ## Driver and bundled skills pstack references
 
-The [driver policy](../SKILL.md#non-negotiables) selects the app driver. For skills and drivers named by these workflows, use these Codex equivalents:
+The [live verification contract](verification.md) selects the project driver, evidence and resource ownership on Codex, taking precedence over the generic driver equivalents below. The [driver policy](../SKILL.md#non-negotiables) applies with that contract. For skills and drivers named by these workflows, use these Codex equivalents:
 
 | Skill or driver named in pstack | On Codex |
 |---------------------------------|----------|
@@ -85,8 +85,8 @@ Affected skill entry points and the optional Codex slash stubs point here. Most 
 | `no-comments` | There is no `comment-sicko` subagent type; see Subagent policy above. |
 | `thermos` | There are no thermo-nuclear subagent types; see Subagent policy above. |
 | `teach` | Running `how` and `why` in parallel maps to `spawn_agent` fan-out; image generation uses the configured Codex equivalent. |
-| `create-verification-skill` | The generated skill lands under `.claude/skills/verify/` on Claude Code; write it to Codex's project-skill location instead. The app-driving harness is platform-neutral. |
-| `maintain-verification-skill` | The parallel per-feature source readers map to `spawn_agent` fan-out; the project-local skill lives under Codex's skills location, not `.claude/skills/`. |
+| `create-verification-skill` | For a new Codex project driver, write `.agents/skills/verify/` under the repo or touched package; follow the [live verification contract](verification.md) for existing drivers, every generated output, and the isolation smoke test. |
+| `maintain-verification-skill` | The parallel per-feature source readers map to native delegation. Resolve the project-selected driver or `.agents/skills/verify/` under the [live verification contract](verification.md); keep source readers separate from the coordinator's live driving. |
 | `babysit` | `loop` and `AskUserQuestion` resolve through the tables above. |
 | `automate-me` | `plugin-dev:skill-development` resolves through the skills table above. Mine history through the [native history contract](history.md), using this workspace's exact Codex run IDs rather than Claude transcript paths. |
 | `recall` | Use the [native history contract](history.md) to select Codex runs in the requested workspace/window, excluding the current run. |

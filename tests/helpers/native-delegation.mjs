@@ -160,7 +160,11 @@ export function fixture(runtime, repo, { codexModel = "gpt-6.1-sol" } = {}) {
   };
 }
 
-export async function nativeRun(f, control, { childAction } = {}) {
+export async function nativeRun(
+  f,
+  control,
+  { childAction, codexSandbox = "workspace-write" } = {},
+) {
   let index = 0,
     parentCall,
     errors = [],
@@ -449,7 +453,7 @@ export async function nativeRun(f, control, { childAction } = {}) {
       "--skip-git-repo-check",
       "--json",
       "-s",
-      "workspace-write",
+      codexSandbox,
       ...f.worktrees.flatMap((p) => ["--add-dir", p]),
       "--",
       "PSTACK_PARENT\nExercise the installed pstack delegation fixture with all ten required lanes, using native agents and separate worktrees. Explicit fixture model choices are gpt-6.1-sol and gpt-6-luna.",
