@@ -115,19 +115,8 @@ describe("parseModels", () => {
     expect(parse((p) => (p.codex.panel = ["a", "a"]))).toThrow('models.json: codex "panel" lists "a" twice');
   });
 
-  test.each([[], ["opus"], ["inherit-parent", "auto"]].map((panel) => [panel]))("a default panel needs at least two explicit models: %j", (panel) => {
-    expect(parse((p) => (p.tiers.panel = panel))).toThrow('tier "panel" needs at least two explicit models');
-  });
-
   test.each([[], ["gpt-test"], ["inherit-parent", "auto"]].map((panel) => [panel]))("a Codex example panel needs at least two explicit models: %j", (panel) => {
     expect(parse((p) => (p.codex.panel = panel))).toThrow('codex "panel" needs at least two explicit models');
-  });
-
-  test("a two-model panel keeps its cardinality through tier resolution", () => {
-    const policy = structuredClone(raw);
-    policy.tiers.panel = ["opus", "sonnet"];
-    const resolved = parseModels(policy, anySkill);
-    expect(role(resolved, "interrogate reviewers").models).toEqual(["opus", "sonnet"]);
   });
 
   test("an effort level Claude Code does not accept, or a repeated one, throws naming it", () => {

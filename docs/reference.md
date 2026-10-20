@@ -158,29 +158,6 @@ Copilot lists only part of a large plugin's skills in its prompt, so some pstack
 
 [`tests/copilot-smoke.sh`](../tests/copilot-smoke.sh) installs the checkout into a throwaway `COPILOT_HOME` and checks installation, routing, `session hook: off`, agent dispatch with an explicit model, first-run setup, that setup writes no sheet without the user's answers and exactly the supplied IDs with them, and that saved choices and plugin files reach a session without `--allow-all-paths` or any path-access request, from each session's `events.jsonl` and the written sheet. It runs the setup checks once per model in `SMOKE_SETUP_MODELS`. It also checks the `PreToolUse` deny, a vendored script and `check-sheet.sh` run with no permission request, that an injected sheet line stays out of the context, that an invalid sheet yields `sheet invalid`, that each hook fires once, the merge with a second plugin's session-start context, a `-p` resume, and, on a pseudo-terminal through [`tests/copilot-tui.py`](../tests/copilot-tui.py), a slash-command first message and an interactive resume. It needs a signed-in `copilot` CLI, spends about twenty premium requests, and skips when `copilot` is missing. CI does not run it.
 
-## Refresh a development installation
-
-While the plugin version remains unchanged, refreshing a Git marketplace and running `plugin update` can retain old Claude Code plugin contents. To refresh an existing Git installation, use the commands below after the changes have been pushed.
-
-For Claude Code, run in your terminal:
-
-```shell
-claude plugin marketplace update pstack-claude
-claude plugin uninstall pstack@pstack-claude
-claude plugin install pstack@pstack-claude
-```
-
-Start a new Claude session or run `/reload-plugins` afterward. A local-folder marketplace reads from that folder directly and does not need this reinstall.
-
-For Codex, refresh the Git marketplace and install its current contents:
-
-```shell
-codex plugin marketplace upgrade pstack-claude
-codex plugin add pstack@pstack-claude
-```
-
-Start a new Codex session afterward.
-
 ## Configuration and dependencies
 
 Invoke [setup-pstack](../plugins/pstack/skills/setup-pstack/SKILL.md) to choose models for each role. It detects available models, confirms the choices, and writes an override sheet. Its [runtime table](../plugins/pstack/skills/setup-pstack/SKILL.md#other-runtimes) names the sheet path and loading mechanism for each runtime. Defaults live in [models.json](../plugins/pstack/models.json).
@@ -207,8 +184,6 @@ Those authoring workflows need `plugin-dev` for their guidance; other workflows 
 Playbooks use the runtime's task-tracking tools or an uncommitted `todo.md` checklist. For Claude Code, the repository documents `CLAUDE_CODE_ENABLE_TODO_TOOLS=1`; see [platform adaptation](../plugins/pstack/skills/poteto-mode/SKILL.md#platform-adaptation).
 
 Use [create-verification-skill](../plugins/pstack/skills/create-verification-skill/SKILL.md) to record how the agent should run and check your project, following the [driver policy](../plugins/pstack/skills/poteto-mode/SKILL.md#non-negotiables).
-
-Use [create-formal-verification-skill](../plugins/pstack/skills/create-formal-verification-skill/SKILL.md) for a model checker, proof, or other verifier tied to a concrete code property. On Claude Code and Codex, shell execution and the chosen verifier's toolchain are prerequisites, not plugin contents. The generated skill records the tool version, setup and run commands, bounds, assumptions, and a deliberately broken case that the check catches. Until those checks actually run, the output is a draft. The separately maintained `agent-formal-verify` plugin is optional and is not required by this bundled skill.
 
 ## Maintenance
 

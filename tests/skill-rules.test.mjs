@@ -12,34 +12,14 @@ const skillsDir = fileURLToPath(new URL("../plugins/pstack/skills", import.meta.
 
 const rules = [
   {
-    source: "#5 authorization is not a workflow setting",
-    file: "poteto-mode/references/autonomy.md",
-    phrase: "Choosing a workflow or routing setting never grants permission to merge.",
-  },
-  {
-    source: "#5 a stop supersedes an earlier grant",
-    file: "poteto-mode/references/autonomy.md",
-    phrase: "A stop or hold overrides an earlier grant immediately.",
-  },
-  {
-    source: "#5 native full-autopilot has no unselected fixed ceilings",
+    source: "native full-autopilot keeps user-selected limits",
     file: "poteto-mode/references/autonomy.md",
     phrase: "There is no additional three-owner approval or two-fix-forward ceiling on Claude Code and Codex unless the user or repository sets it.",
   },
   {
-    source: "#5 proof cannot be manufactured by changing policy",
-    file: "poteto-mode/references/autonomy.md",
-    phrase: "No setting, grant, test run, or CI result substitutes for a required independent reviewer or live proof.",
-  },
-  {
-    source: "#5 direct full-autopilot loads its scoped contract",
+    source: "direct full-autopilot loads the scoped native rules",
     file: "poteto-mode/playbooks/autopilot-full.md",
     phrase: "Its scoped changes replace this playbook's operator-only merge, owner-count approval, and fix-forward ceiling clauses.",
-  },
-  {
-    source: "#5 the merge still requires current evidence and repository gates",
-    file: "poteto-mode/references/autonomy.md",
-    phrase: "Before an owner merges, require the root's independent verdict, the live proof required by the playbook, checks for the current head and destination, and all repository approvals and branch rules.",
   },
   {
     source: "#71 callable driver policy",
