@@ -4,8 +4,6 @@
 
 Lauren Tan's [pstack](https://github.com/cursor/plugins/tree/main/pstack) is an opinionated Cursor skill stack that improves agent outcomes. This is a port for Claude Code, Codex, Pi, GitHub Copilot and other agent harnesses. It tracks upstream and also carries named policy forks, each declared in [`tools/forks.json`](tools/forks.json).
 
-This personal fork targets Claude Code and Codex using their normal plugin installers. Other harness integrations retain the inherited upstream implementation. See the [compatibility baseline](docs/compatibility-baseline.md) for reviewed source revisions, verified behavior, and remaining gaps.
-
 Tell `poteto-mode` your goal and it will invoke the correct workflow for the task. It keeps your code concise, simple and verified.
 
 For concurrency bugs and invariants that tests rarely reach, use the bundled [create-formal-verification-skill](plugins/pstack/skills/create-formal-verification-skill/SKILL.md). It chooses a verifier for the project and generates a repeatable check; the verifier and its runtime dependencies must be installed separately.

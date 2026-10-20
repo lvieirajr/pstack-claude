@@ -53,8 +53,6 @@ Find each skill's instructions in the [skills tree](../plugins/pstack/skills/).
 
 ## Runtime support
 
-This section records the inherited port's setup and reported verification. The fork's [compatibility baseline](compatibility-baseline.md) distinguishes independently repeated checks, maintainer reports, and remaining gaps for Claude Code and Codex, alongside historical research for other harnesses. Claude Code and Codex use the native plugin installation commands in the [README](../README.md#install). Dotfiles may invoke those commands; each harness owns its installation and model configuration. Native registration and workflow verification remain distinct.
-
 All runtimes share [one skills tree](../plugins/pstack/skills/). A skills-only installation includes the skills, scripts, agent references, and license notices. The Claude Code, Codex, and GitHub Copilot plugins also install automatic routing hooks, and the Pi package adds an extension that injects the same routing and supplies the subagent tools. Codex command shortcuts are separate.
 
 | Runtime | Setup and recorded verification |
@@ -109,7 +107,7 @@ The [CI installation check](../.github/workflows/ci.yml) uses the skills CLI to 
 
 The [native plugin manifest](../plugins/pstack/.codex-plugin/plugin.json) points to the shared skills directory and the Codex [SessionStart hook](../plugins/pstack/hooks/codex-hooks.json). The [marketplace catalog](../.agents/plugins/marketplace.json) lists `pstack` in the `pstack-claude` marketplace. Review and trust the hook through `/hooks`; Codex asks again when its definition changes.
 
-The [README installation](../README.md#codex) registers that catalog with `codex plugin marketplace add`, then installs the plugin with `codex plugin add`. A fresh local-checkout installation and plugin listing passed on Codex CLI 0.163.0 with a disposable configuration directory. This checks installation, not model invocation or hook trust; see the [baseline verification record](compatibility-baseline.md#verification-record).
+The [README installation](../README.md#codex) registers that catalog with `codex plugin marketplace add`, then installs the plugin with `codex plugin add`.
 
 OpenAI documents [marketplace registration and the plugin format](https://developers.openai.com/plugins/build/plugins#add-a-marketplace-from-the-cli). If your CLI lacks `plugin add`, use the plugin browser after registering the marketplace, or use the [skills-only installation](#shared-skills-installation).
 
@@ -161,7 +159,7 @@ Copilot lists only part of a large plugin's skills in its prompt, so some pstack
 
 ## Refresh a development installation
 
-This fork keeps version 0.9.93 until its first ready release. In the issue #4 check on Claude Code 2.1.292, refreshing a Git marketplace and running `plugin update` retained the old plugin contents at the same version. To refresh an existing Git installation during development, use the native commands below after the changes have been pushed.
+While the plugin version remains unchanged, refreshing a Git marketplace and running `plugin update` can retain old Claude Code plugin contents. To refresh an existing Git installation, use the commands below after the changes have been pushed.
 
 For Claude Code, run in your terminal:
 
@@ -180,31 +178,7 @@ codex plugin marketplace upgrade pstack-claude
 codex plugin add pstack@pstack-claude
 ```
 
-Start a new Codex session afterward. Both procedures refreshed the installed skills from 63 to 64 in disposable configurations without adding a second enabled plugin registration. These checks used a local Git fixture through the native installers; remote GitHub fetching and a versioned release update remain separate checks. See the [verification record](compatibility-baseline.md#issue-4-source-sync).
-
-## Autonomy and routing
-
-On Claude Code and Codex, [the installed autonomy contract](../plugins/pstack/skills/poteto-mode/references/autonomy.md) restores Lauren's full-autopilot owner-to-merge path when the user's grant covers landing. A manual review gate, concurrency limit, or fix-forward limit can be stated in the task or native `CLAUDE.md`/`AGENTS.md`; pstack adds no fixed three-owner approval or two-round ceiling on these two harnesses. Required independent review, real-surface proof, current-revision checks, and repository protections still apply. The separate Autopilot-stack workflow still leaves landing to the operator.
-
-`/setup-pstack` already offers the persistent `session hook: on/off` routing choice. Automatic routing remains an inherited, selectable difference from Lauren's invocation-based setup; turning it off removes the startup mandate while leaving skills available. Routing never grants merge authority. See the [fork-policy audit](workflow-policy.md) for retained differences and their source revisions.
-
-## Delegation and independent review
-
-On Claude Code and Codex, the installed [native delegation contract](../plugins/pstack/skills/poteto-mode/references/delegation.md) adapts worker execution while preserving each workflow's phases, evidence, and independent verdicts. Arena, swarm, interrogate, how, reflect, and orchestration point to it. Other harnesses retain their inherited procedure.
-
-Required logical lanes are queued within observed native capacity. A smaller concurrency limit does not reduce ten required scenarios to two results. Writers own separate worktrees and branches; stop confirmation and background-process reconciliation precede ownership reuse. Recovery treats interrupted workers as unknown until reconciled. A completion notification, previous-state reply, or changed transcript timestamp cannot establish shutdown.
-
-Pass children the exact enabled plugin paths and source hashes. Version alone cannot distinguish this fork's development commits. Reviewers retain separate identities and current input revisions; model diversity follows the existing model-selection contract. A missing independent reviewer blocks dependent completion and shipping. Read-only instructions do not create a sandbox or a missing native tool.
-
-Opt-in native checks use both installed CLIs with disposable homes and Git marketplace/worktree fixtures. Responses come from localhost scripts, not external models. Run `PSTACK_NATIVE_DELEGATION=1 bun test tests/native-delegation.test.mjs`. The [compatibility record](compatibility-baseline.md#issue-8-native-delegation) separates native mechanics from complete model-driven panels.
-
-## History and transcripts
-
-Claude Code and Codex use the installed [native history contract](../plugins/pstack/skills/poteto-mode/references/history.md) for recall, habit mining, reflection, decision-trail audits, Eval, and transcript fallback during session pickup. The checkpoint remains the first source for pickup. User instructions retain precedence; missing transcript evidence stays visible.
-
-The Node.js helper at `plugins/pstack/skills/reflect/scripts/history.mjs` takes an explicit runtime, workspace, and exact run ID. It reads Claude's configured project transcripts with linked-message branch selection, or Codex's native paginated history through the local app server. `$CLAUDE_CONFIG_DIR` and `$CODEX_HOME` are respected. It does not select the newest concurrent session, fall back from Codex to Claude, or equate a child thread with its shared session root. The legacy Pi/Copilot readers are unchanged.
-
-Use scoped `list` metadata to establish a corpus/window and `read` to export a selected run to a new private temporary file. Full commands, branch/launch-boundary selection, and workflow-specific fallback rules are in the contract. Exports preserve native records and limitations; a digest cannot pass a tool-read eval or complete a transcript audit. Relevant native omissions, active/buffered activity, unsupported formats, and unavailable sources remain evidence gaps. No transcript, credential, runtime state, or export belongs in tracked dotfiles.
+Start a new Codex session afterward.
 
 ## Configuration and dependencies
 
@@ -273,7 +247,7 @@ bun test tests/
 
 The install step reads the root `bun.lock` and fetches `typebox`, which the Pi extension and its tests import.
 
-CI also checks shell scripts, workflows, Markdown, relative links, and the bundled Bun tools. See [local checks](../CONTRIBUTING.md#things-that-will-fail-ci) for commands and [version and upstream tracking](../CONTRIBUTING.md#version-and-upstream-tracking) for this personal fork's version policy.
+CI also checks shell scripts, workflows, Markdown, relative links, and the bundled Bun tools. See [local checks](../CONTRIBUTING.md#things-that-will-fail-ci) for commands and [release instructions](../CONTRIBUTING.md#releasing) for versioning and the live Claude Code command check.
 
 ### Port scope and attribution
 
@@ -281,7 +255,7 @@ The skill tree is synced against upstream `8838150c6b4829ea3c01782631213776d86df
 
 This repository ports Lauren Tan's pstack from Cursor to Claude Code and shares the skills with other runtimes. It includes six cursor-team-kit skills, the three thermos skills with their two review subagents, and an independently authored `babysit` skill. The port supplies Claude Code plugin registration and routing, Codex manifests and shortcuts, the Codex tool mapping, the Pi package, extension, and tool mapping, and the GitHub Copilot hooks and tool mapping.
 
-Cursor-specific automations, sticky-mode metadata, the Grok Bot UI workflow, and the Cursor UI tutorial are excluded. [tools/upstream.json](../tools/upstream.json) records the revisions and exclusions, [tools/substitutions.json](../tools/substitutions.json) holds the Cursor-to-Claude rewrite rules, and [CHANGES.md](../CHANGES.md) preserves the upstream port's release history. GitHub issues and commits record this personal fork's changes. The bundled `thermo-nuclear-code-quality-review` provides a maintainability review when a workflow calls for one, `thermo-nuclear-review` a correctness and security audit, and `thermos` runs both as parallel subagents.
+Cursor-specific automations, sticky-mode metadata, the Grok Bot UI workflow, and the Cursor UI tutorial are excluded. [tools/upstream.json](../tools/upstream.json) records the revisions and exclusions, [tools/substitutions.json](../tools/substitutions.json) holds the Cursor-to-Claude rewrite rules, and [CHANGES.md](../CHANGES.md) records each release. The bundled `thermo-nuclear-code-quality-review` provides a maintainability review when a workflow calls for one, `thermo-nuclear-review` a correctness and security audit, and `thermos` runs both as parallel subagents.
 
 For skill changes, follow the [sync boundary](../CONTRIBUTING.md#the-sync-boundary). Runtime adaptations and workflow changes both land here, and a workflow change is declared as a fork.
 

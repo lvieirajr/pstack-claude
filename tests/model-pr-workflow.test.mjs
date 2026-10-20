@@ -37,7 +37,7 @@ for (const runtime of ["claude", "codex"])
       const stateFile = join(f.root, "state.json");
       try {
         f.env.BUN_INSTALL_CACHE_DIR =
-          process.env.BUN_INSTALL_CACHE_DIR ?? "/tmp/pstack-issue6-bun-cache";
+          process.env.BUN_INSTALL_CACHE_DIR ?? "/tmp/pstack-bun-cache";
         const scripts = join(f.plugin, "skills/poteto-mode/scripts/watch-pr");
         f.run("bun", [join(scripts, "ship-pr"), "--help"]);
         const contract = join(

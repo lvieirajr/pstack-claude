@@ -60,7 +60,7 @@ for (const runtime of ["claude", "codex"])
           process.env.GH_CONFIG_DIR ??
           join(process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config"), "gh");
         f.env.BUN_INSTALL_CACHE_DIR =
-          process.env.BUN_INSTALL_CACHE_DIR ?? "/tmp/pstack-issue6-bun-cache";
+          process.env.BUN_INSTALL_CACHE_DIR ?? "/tmp/pstack-bun-cache";
         f.git(f.workspace, "config", "credential.helper", "");
         f.git(
           f.workspace,
@@ -176,7 +176,7 @@ for (const runtime of ["claude", "codex"])
         const body = join(f.root, "body.md");
         writeFileSync(
           body,
-          "Owned issue #10 integration fixture. No production target. Current checks and independent fixture proof are required before an explicit test landing grant.\n",
+          "Owned PR workflow integration fixture. No production target. Current checks and independent fixture proof are required before an explicit test landing grant.\n",
         );
         const parent = f.worktrees[2],
           child = f.worktrees[3];

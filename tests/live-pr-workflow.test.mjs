@@ -64,7 +64,7 @@ for (const runtime of ["claude", "codex"])
           process.env.GH_CONFIG_DIR ??
           join(process.env.XDG_CONFIG_HOME ?? join(homedir(), ".config"), "gh");
         f.env.BUN_INSTALL_CACHE_DIR =
-          process.env.BUN_INSTALL_CACHE_DIR ?? "/tmp/pstack-issue6-bun-cache";
+          process.env.BUN_INSTALL_CACHE_DIR ?? "/tmp/pstack-bun-cache";
         f.git(f.workspace, "config", "credential.helper", "");
         f.git(
           f.workspace,
