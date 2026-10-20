@@ -1,5 +1,7 @@
 ### Eval
 
+On Claude Code and Codex, follow the [native history contract](../references/history.md#workflow-evidence-requirements) for step 6. Record exact candidate run/workspace identities and launch boundaries, and grade actual tool-read evidence; unavailable history cannot become a pass. Other harnesses retain the inherited procedure.
+
 **You own the experiment design. Plan, blind, run, synthesize.**
 
 **Non-negotiables for blinding:**

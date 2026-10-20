@@ -84,11 +84,13 @@ Affected skill entry points and the optional Codex slash stubs point here. Most 
 | `create-verification-skill` | The generated skill lands under `.claude/skills/verify/` on Claude Code; write it to Codex's project-skill location instead. The app-driving harness is platform-neutral. |
 | `maintain-verification-skill` | The parallel per-feature source readers map to `spawn_agent` fan-out; the project-local skill lives under Codex's skills location, not `.claude/skills/`. |
 | `babysit` | `loop` and `AskUserQuestion` resolve through the tables above. |
-| `automate-me` | `plugin-dev:skill-development` resolves through the skills table above. |
+| `automate-me` | `plugin-dev:skill-development` resolves through the skills table above. Mine history through the [native history contract](history.md), using this workspace's exact Codex run IDs rather than Claude transcript paths. |
+| `recall` | Use the [native history contract](history.md) to select Codex runs in the requested workspace/window, excluding the current run. |
+| `show-me-your-work` | Audit the exact Codex run through the [native history contract](history.md); a digest cannot substitute for actual tool evidence. |
 | `architect` | The runner panel goes through the **arena** skill, so its `spawn_agent` fan-out and model substitution apply here too. |
 | `arena` | The parallel candidates and the cross-judge map to `spawn_agent`; substitute your configured Codex models for the runners and the cross-judge pool (see Model names above). |
 | `how` | The parallel explorers and the explainer map to `spawn_agent` fan-out; substitute your configured Codex models. |
-| `reflect` | The three reviewers and the synthesizer map to `spawn_agent`; substitute your configured Codex models. The transcript finder reads Claude Code's layout under `~/.claude/projects/`, so pass the session digest step 1 allows instead. |
+| `reflect` | The three reviewers and the synthesizer map to `spawn_agent`; substitute your configured Codex models. Read the exact Codex run through the [native history contract](history.md); use step 1's neutral digest only when native evidence is unavailable. |
 | `swarm` | Each worker is a `spawn_agent` call on your configured Codex model, and those calls already run concurrently; give each writing worker its own worktree or output directory (see Subagent policy above). |
 | `why` | The parallel investigators and the synthesizer map to `spawn_agent`; substitute your configured Codex models. List MCP servers from the tools Codex exposes to the session, not from `.mcp.json` or `claude mcp list`. |
 

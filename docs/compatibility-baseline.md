@@ -55,7 +55,7 @@ These cells summarize the inherited implementation. Follow the [runtime referenc
 | Live application proof | Source driver policy; project-specific proof unverified | Source app tools; project-specific proof unverified | Source driver mapping; proof unverified | Gap: adapter/driver integration | Source driver mapping; proof unverified |
 | PR delivery and merge authority | Fixture shared helpers; end-to-end unverified | Source stack/session tools; end-to-end unverified | Fixture shared helpers; end-to-end unverified | Gap: adapter; shared helpers available | Fixture shared helpers; end-to-end unverified |
 | Scheduling and unattended work | Gap: cadence fallback is not durable scheduling | Source native automation mapping; recovery unverified | Gap: no portable durable loop implementation | Gap: no concrete scheduler adapter | Fixture/reported timers; only live interactive parent scheduling |
-| History and resume | Source transcript mapping; fixture reader/checkpoints | Source mapping; app history coverage unverified | Gap: history workflows still name Claude paths; fixture checkpoints | Gap: no concrete history adapter; shared checkpoints available | Fixture transcript/branch reader and checkpoints |
+| History and resume | Source transcript mapping; fixture reader/checkpoints | Source mapping; app history coverage unverified | Native scoped helper and checkpoint fixtures; real Codex persisted-history read; full model-driven history workflows unverified | Gap: no concrete history adapter; shared checkpoints available | Fixture transcript/branch reader and checkpoints |
 
 The maintainer's reported checks are useful evidence, but their presence does not upgrade an untested full workflow. The Pi live table records an OpenAI sign-in; Anthropic and legacy OpenAI-Codex model IDs were catalog-checked, not called live in that report. Required independent review stays closed when no eligible reviewer can run.
 
@@ -175,6 +175,26 @@ These checks do not exercise remote GitHub fetching, live-home installation, mod
 The [policy audit](workflow-policy.md) classifies all 48 pstack forks and the one thermos fork after issue #4. A Claude/Codex-only installed contract restores authorized full-autopilot merges and replaces the inherited fixed owner-count/retry gates with native user or repository limits. It preserves manual review requests, stops, independent review, real-surface proof, current-revision shipping checks, and the separate operator-landed stack workflow. Routing remains explicitly selectable through the inherited model-sheet setting.
 
 The root suite passed 1,265 tests with 40 skips and zero failures. Generation and the pstack ownership audit passed. Native Git-marketplace fixture installs on Claude Code 2.1.292 and Codex 0.163.0 carried the new contract and its entrypoint links, retained one enabled registration, preserved shared instruction symlinks and contents, and read on/off routing choices across fresh installed-hook processes. The [validation record](workflow-policy.md#issue-5-validation-record) distinguishes those checks from model-backed authorization, stop, independent-review, and actual merge scenarios, which were not executed.
+
+### Issue #6 native history
+
+The installed [history contract](../plugins/pstack/skills/poteto-mode/references/history.md) routes Claude Code and Codex recall, habit mining, reflection, trail auditing, Eval, and pickup transcript fallback through exact workspace/run evidence. The checkpoint remains first for pickup. The adapter uses configured Claude project transcripts and their linked message branch, or Codex's read-only native paginated history. Native host exports remain usable under the same evidence requirements. The two new declared upstream departures are the scoped automate-me and Eval entrypoints; the other affected skills were already declared forks.
+
+| Check | Observed result |
+| --- | --- |
+| Root suite, Bun 1.4.3 / Node.js 26.12.0 | 1,291 pass, 40 skip, zero fail across 46 files |
+| New history regressions | 26 pass; exact IDs, concurrent copies, workspace/config roots, branches, paging, incomplete evidence, launch boundaries, private exports, and symlink invocation |
+| Pstack ownership at the unchanged v0.15.27 pin | 83 unchanged files, 50 declared forks; no conflicts, stale/undeclared forks, or denylist hits |
+| Generator and installed skill references | 89 generated files current; link, prose-path, model, packaging, and hook checks passed |
+| Codex CLI 0.163.0, actual current conversation | Read only that thread in its declared workspace; 35 persisted turns included native command/tool records. Only counts and limitations were logged, not transcript content |
+| Claude Code 2.1.292, isolated runtime fixture | A localhost scripted response provider drove the actual CLI and a real Read tool call. The helper recovered seven linked native records and the actual tool result under a relocated Claude config home, without external inference |
+| Native Git plugin installations, both CLIs | Final helper modules and history reference matched the source; one enabled registration each; installed helper read the configured Claude source and queried an isolated Codex home, with no Claude substitution for an unavailable Codex run |
+| Artifact placement | Explicit new temporary exports used private file permissions; plugin fixture registrations were removed; no transcript/state/credential files were added to the repository or dotfiles |
+| Formatting and documentation | New JavaScript passed Prettier 3.6.2; Markdown and offline link checks passed |
+
+Non-leaf selection, nested truncated content, symlink invocation, and an empty launch-boundary argument were demonstrated as failures before their fixes. The existing Pi/Copilot readers, worktree audit, hooks, models, installation commands, component pins, and 0.9.93 release metadata remain unchanged.
+
+These checks establish retrieval and installed execution, not model judgment in a complete recall, habit-mining, reflection, trail-review, or blinded Eval workflow. The Codex read covers persisted native history, not buffered activity in another running host. Unknown Claude layouts, ambiguous branches, compaction/content gaps, remote-only history, and older unsupported Codex methods require an explicit native source or a precise limitation. Digests remain permitted only where the original workflow allows them; they cannot pass tool-read grading or complete an unavailable transcript audit.
 
 ## Workflow acceptance scenarios
 

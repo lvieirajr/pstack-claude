@@ -188,6 +188,14 @@ On Claude Code and Codex, [the installed autonomy contract](../plugins/pstack/sk
 
 `/setup-pstack` already offers the persistent `session hook: on/off` routing choice. Automatic routing remains an inherited, selectable difference from Lauren's invocation-based setup; turning it off removes the startup mandate while leaving skills available. Routing never grants merge authority. See the [fork-policy audit](workflow-policy.md) for retained differences and their source revisions.
 
+## History and transcripts
+
+Claude Code and Codex use the installed [native history contract](../plugins/pstack/skills/poteto-mode/references/history.md) for recall, habit mining, reflection, decision-trail audits, Eval, and transcript fallback during session pickup. The checkpoint remains the first source for pickup. User instructions retain precedence; missing transcript evidence stays visible.
+
+The Node.js helper at `plugins/pstack/skills/reflect/scripts/history.mjs` takes an explicit runtime, workspace, and exact run ID. It reads Claude's configured project transcripts with linked-message branch selection, or Codex's native paginated history through the local app server. `$CLAUDE_CONFIG_DIR` and `$CODEX_HOME` are respected. It does not select the newest concurrent session, fall back from Codex to Claude, or equate a child thread with its shared session root. The legacy Pi/Copilot readers are unchanged.
+
+Use scoped `list` metadata to establish a corpus/window and `read` to export a selected run to a new private temporary file. Full commands, branch/launch-boundary selection, and workflow-specific fallback rules are in the contract. Exports preserve native records and limitations; a digest cannot pass a tool-read eval or complete a transcript audit. Relevant native omissions, active/buffered activity, unsupported formats, and unavailable sources remain evidence gaps. No transcript, credential, runtime state, or export belongs in tracked dotfiles.
+
 ## Configuration and dependencies
 
 Invoke [setup-pstack](../plugins/pstack/skills/setup-pstack/SKILL.md) to choose models for each role. It detects available models, confirms the choices, and writes an override sheet. Its [runtime table](../plugins/pstack/skills/setup-pstack/SKILL.md#other-runtimes) names the sheet path and loading mechanism for each runtime. Defaults live in [models.json](../plugins/pstack/models.json).

@@ -5,6 +5,8 @@ description: "Keep a reviewable decision trail for long-running or unattended wo
 
 # Show me your work
 
+On Codex, read the [platform mapping](../poteto-mode/references/codex-tools.md), including its per-skill notes, before following this skill.
+
 On GitHub Copilot, read the [platform mapping](../poteto-mode/references/copilot-tools.md), including its per-skill notes, before following this skill.
 
 Keep one canonical log.
@@ -52,6 +54,8 @@ Commit it only when the work is ambitious enough that a reviewer needs the trail
 
 - Append-only. A wrong call gets a new row that supersedes it. Never edit or delete history.
 - Prefer evidence produced by committed scripts over hand-made one-offs (the **encode-lessons-in-structure** principle skill).
+
+On Claude Code and Codex, follow the [native history contract](../poteto-mode/references/history.md) for transcript discovery and evidence requirements in this skill. It replaces the Claude-only history paths and newest/fragment selection below; other harnesses retain the inherited procedure.
 
 ## Audit the log against the transcript
 

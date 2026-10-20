@@ -15,6 +15,8 @@ Invoke when the user says "reflect" or "/reflect". Skip when the conversation is
 
 ## 1. Locate the active transcript
 
+On Claude Code and Codex, follow the [native history contract](../poteto-mode/references/history.md) for transcript discovery and evidence requirements in this skill. It replaces the Claude-only history paths and newest/fragment selection below; other harnesses retain the inherited procedure.
+
 Before fanning out, find this conversation's transcript in Claude Code's per-project transcripts directory at `~/.claude/projects/<encoded-cwd>/`. Do not glob across `~/.claude/projects/`. That crosses workspace boundaries and reads private chats from unrelated projects.
 
 Run the finder at `skills/reflect/scripts/find-transcript.mjs` under the installed plugin with the projects directory and a fragment of the conversation's opening user prompt:

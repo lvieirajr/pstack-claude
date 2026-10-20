@@ -12,6 +12,12 @@
       "since": "0.9.34",
       "upstream": "not-proposed"
     },
+    "plugins/pstack/skills/automate-me/SKILL.md": {
+      "kind": "port-feature",
+      "why": "Routes Claude Code and Codex transcript evidence through the installed native history contract, with exact workspace/run identity and explicit limits on unavailable or inherited evidence; other harnesses retain their inherited procedures.",
+      "since": "0.9.93",
+      "upstream": "not-proposed"
+    },
     "plugins/pstack/skills/blast-radius/SKILL.md": {
       "kind": "policy",
       "why": "Extends the trigger to run before design when a brief asserts something about existing code.",
@@ -72,6 +78,12 @@
       "since": "0.9.10",
       "upstream": "not-proposed"
     },
+    "plugins/pstack/skills/poteto-mode/playbooks/eval.md": {
+      "kind": "port-feature",
+      "why": "Routes Claude Code and Codex transcript evidence through the installed native history contract, with exact workspace/run identity and explicit limits on unavailable or inherited evidence; other harnesses retain their inherited procedures.",
+      "since": "0.9.93",
+      "upstream": "not-proposed"
+    },
     "plugins/pstack/skills/poteto-mode/playbooks/feature.md": {
       "kind": "policy",
       "why": "Gives every file-writing delegate its own worktree, based on the branch's HEAD when it builds on unmerged commits, and forbids writing in a worktree a delegate still holds.",
@@ -104,7 +116,7 @@
     },
     "plugins/pstack/skills/poteto-mode/playbooks/session-pickup.md": {
       "kind": "policy",
-      "why": "Reads the project checkpoint first and applies the human-rulings epistemics when reconstructing state.",
+      "why": "Reads the project checkpoint first and applies the human-rulings epistemics when reconstructing state. Personal fork issue #6 uses the scoped native Claude/Codex history contract for exact workspace/run evidence and explicit unavailable-history outcomes.",
       "since": "0.9.34",
       "upstream": "not-proposed"
     },
@@ -236,13 +248,13 @@
     },
     "plugins/pstack/skills/recall/SKILL.md": {
       "kind": "policy",
-      "why": "Sweeps the locations the project's standing rules name before reporting anything as never recorded and applies the human-rulings epistemics, on top of Claude Code's transcript path.",
+      "why": "Sweeps the locations the project's standing rules name before reporting anything as never recorded and applies the human-rulings epistemics, on top of Claude Code's transcript path. Personal fork issue #6 uses the scoped native Claude/Codex history contract for exact workspace/run evidence and explicit unavailable-history outcomes.",
       "since": "0.9.2",
       "upstream": "not-proposed"
     },
     "plugins/pstack/skills/reflect/SKILL.md": {
       "kind": "port-feature",
-      "why": "Finds the session transcript with the port's find-transcript.mjs under Claude Code's projects directory, keeps the parent's conclusions out of the reviewer prompts (a fallback digest records events without a verdict, and nothing goes beside a transcript path), and drops Cursor's readonly agent mode and inline model column.",
+      "why": "Finds the session transcript with the port's find-transcript.mjs under Claude Code's projects directory, keeps the parent's conclusions out of the reviewer prompts (a fallback digest records events without a verdict, and nothing goes beside a transcript path), and drops Cursor's readonly agent mode and inline model column. Personal fork issue #6 uses the scoped native Claude/Codex history contract for exact workspace/run evidence and explicit unavailable-history outcomes.",
       "since": "0.1.0",
       "upstream": "not-proposed"
     },
@@ -254,7 +266,7 @@
     },
     "plugins/pstack/skills/show-me-your-work/SKILL.md": {
       "kind": "policy",
-      "why": "Documents that log.sh also neutralizes a cell opening with a double quote.",
+      "why": "Documents that log.sh also neutralizes a cell opening with a double quote. Personal fork issue #6 uses the scoped native Claude/Codex history contract for exact workspace/run evidence and explicit unavailable-history outcomes.",
       "since": "0.9.41",
       "upstream": "not-proposed"
     },
