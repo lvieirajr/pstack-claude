@@ -78,11 +78,9 @@ bunx prettier@3.6.2 --check .
 
 The scripts use Prettier 3.6.2 at upstream's settings in `.prettierrc.json`, CI runs the same check, and `.prettierignore` names each file the check skips and why.
 
-`ship-pr` has one check CI cannot run. `watch-pr/live-merge-safety.mjs` creates a private repository on your `gh` account, drives `ship-pr inspect` and `cancel-pending` against a stale head, a moved base, and a retargeted base, confirms GitHub refuses a merge at a stale SHA, merges the current head, and deletes the repository. The delete needs the `gh` token's `delete_repo` scope; when it fails, the script prints the command to delete the repository by hand. Run it from the same directory before a release that changes `watch-pr/`:
+The inherited `watch-pr/live-merge-safety.mjs` probe deletes its fixture repository. It is excluded from this personal fork's validation workflow. Do not run it or request repository-deletion access; use the Claude Code/Codex live PR test below, which leaves the repository for manual cleanup.
 
-```shell
-bun watch-pr/live-merge-safety.mjs --live-disposable
-```
+Claude Code/Codex PR workflow checks have separate opt-in tiers: `PSTACK_NATIVE_PR=1 bun test tests/native-pr-workflow.test.mjs` uses real native installations with a scripted provider/local forge; `PSTACK_MODEL_PR=1 bun test tests/model-pr-gates.test.mjs` makes paid model calls for bounded hold checks; `PSTACK_MODEL_PR_WORKFLOW=1 bun test tests/model-pr-workflow.test.mjs` evaluates author, independent verifier and authorized landing against a local forge/Git destination; `PSTACK_LIVE_PR=1 bun test tests/live-pr-workflow.test.mjs` runs actual Actions with scripted tool sequences plus a paid independent native-model verifier in a private GitHub fixture left for manual cleanup. The live tier requires existing `repo` and `workflow` scopes before any creation, never launches authentication, and never deletes a GitHub repository. Fixtures are private by default; only explicitly approved synthetic fixtures use `PSTACK_LIVE_PR_VISIBILITY=public`. `PSTACK_LIVE_PR_SAFETY=1` runs stack, service-gate and stop/resume checks against validated retained fixtures selected by `PSTACK_LIVE_PR_REPOSITORIES`; the coverage record documents the map and visibility setting. It records and prints the repository URL on success or failure for the user to remove manually. Read the [coverage record](docs/compatibility-baseline.md#issue-10-pr-workflows) for successful runs, retained failure evidence and unproven limits. These tiers are separate from ordinary CI; no browser is involved.
 
 If you touched a workflow, audit it before pushing:
 

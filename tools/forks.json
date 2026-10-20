@@ -86,19 +86,19 @@
     },
     "plugins/pstack/skills/poteto-mode/playbooks/autopilot-full.md": {
       "kind": "policy",
-      "why": "Owners stop at merge-ready and the operator clicks every merge, with the patch-id rule governing re-verification if trunk moves first, instead of each owner merging after a clean verdict, and the root writes the program objective into standing orders on the go and re-reads it each tick, arms the tick as a dynamic-mode /loop, states the program's size before the first owner starts and waits for the operator's go above three owners, scopes review lanes to what the diff breaks, and stops a PR at two fix-forwards. Personal fork issue #5 scopes an override to Claude Code and Codex: owner merges require the actual user grant and all proof/repository gates, and the fixed size and fix-forward limits apply only when selected by user or repository instructions.",
+      "why": "Owners stop at merge-ready and the operator clicks every merge, with the patch-id rule governing re-verification if trunk moves first, instead of each owner merging after a clean verdict, and the root writes the program objective into standing orders on the go and re-reads it each tick, arms the tick as a dynamic-mode /loop, states the program's size before the first owner starts and waits for the operator's go above three owners, scopes review lanes to what the diff breaks, and stops a PR at two fix-forwards. Personal fork issue #5 scopes an override to Claude Code and Codex: owner merges require the actual user grant and all proof/repository gates, and the fixed size and fix-forward limits apply only when selected by user or repository instructions. Personal fork issue #10 scopes Claude/Codex installed-helper execution, authority and reviewer evidence, native process handles, and landing recovery to the PR workflow contract.",
       "since": "0.9.39",
       "upstream": "not-proposed"
     },
     "plugins/pstack/skills/poteto-mode/playbooks/autopilot-stack.md": {
       "kind": "policy",
-      "why": "Records each verdict's head SHA, base SHA, base branch, and patch-id, cancels pending merges and leases each push against the captured remote head before the root rewrites or retargets the chain, and re-verifies a verdict whose applicability to the new base is uncertain.",
+      "why": "Records each verdict's head SHA, base SHA, base branch, and patch-id, cancels pending merges and leases each push against the captured remote head before the root rewrites or retargets the chain, and re-verifies a verdict whose applicability to the new base is uncertain. Personal fork issue #10 scopes Claude/Codex installed-helper execution, authority and reviewer evidence, native process handles, and landing recovery to the PR workflow contract.",
       "since": "0.9.34",
       "upstream": "not-proposed"
     },
     "plugins/pstack/skills/poteto-mode/playbooks/babysit.md": {
       "kind": "policy",
-      "why": "Requires confirming that the first status read reports the requested PR or stack, and naming the merge frontier, before acting on it, and reports the watcher's behind-base gate to the branch owner instead of resolving it, as it does a conflict.",
+      "why": "Requires confirming that the first status read reports the requested PR or stack, and naming the merge frontier, before acting on it, and reports the watcher's behind-base gate to the branch owner instead of resolving it, as it does a conflict. Personal fork issue #10 scopes Claude/Codex installed-helper execution, authority and reviewer evidence, native process handles, and landing recovery to the PR workflow contract.",
       "since": "0.9.39",
       "upstream": "not-proposed"
     },
@@ -128,7 +128,7 @@
     },
     "plugins/pstack/skills/poteto-mode/playbooks/opening-a-pr.md": {
       "kind": "policy",
-      "why": "Requires stopping every live agent that holds a worktree before committing, merging, or deploying from it.",
+      "why": "Requires stopping every live agent that holds a worktree before committing, merging, or deploying from it. Personal fork issue #10 scopes Claude/Codex installed-helper execution, authority and reviewer evidence, native process handles, and landing recovery to the PR workflow contract.",
       "since": "0.9.10",
       "upstream": "not-proposed"
     },
@@ -152,7 +152,7 @@
     },
     "plugins/pstack/skills/poteto-mode/playbooks/shipping.md": {
       "kind": "policy",
-      "why": "Lands one PR at a time under the user's landing authority, cancelling pending merges before any chain change, merging only under a service-enforced head condition, arming auto-merge or a queue only behind repository rules that enforce the verdict, and confirming each landing in the destination's history before advancing, with verifiers that drive the real surface through the driver skill in their own worktrees, a matching patch-id that keeps a review only after its applicability to the new base is checked, and the watcher owning blocker classification, with a branch behind its base routed to the topology owner.",
+      "why": "Lands one PR at a time under the user's landing authority, cancelling pending merges before any chain change, merging only under a service-enforced head condition, arming auto-merge or a queue only behind repository rules that enforce the verdict, and confirming each landing in the destination's history before advancing, with verifiers that drive the real surface through the driver skill in their own worktrees, a matching patch-id that keeps a review only after its applicability to the new base is checked, and the watcher owning blocker classification, with a branch behind its base routed to the topology owner. Personal fork issue #10 scopes Claude/Codex installed-helper execution, authority and reviewer evidence, native process handles, and landing recovery to the PR workflow contract.",
       "since": "0.9.34",
       "upstream": "not-proposed"
     },

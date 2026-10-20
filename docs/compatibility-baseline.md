@@ -42,7 +42,7 @@ An offline fixture is not a live model workflow. A successful plugin install is 
 
 ## Capability matrix
 
-These cells summarize the inherited implementation. Follow the [runtime reference](reference.md#runtime-support), [Pi mechanism evidence](pi-equivalence.md), and archived comparison for scope and sources.
+These cells summarize the initial inherited implementation; the issue records below provide this fork's later Claude Code/Codex evidence. Follow the [runtime reference](reference.md#runtime-support), [Pi mechanism evidence](pi-equivalence.md), and archived comparison for scope and sources.
 
 | Capability | Copilot CLI | Copilot app | Codex | OpenCode | Pi |
 | --- | --- | --- | --- | --- | --- |
@@ -128,7 +128,7 @@ PSTACK_PI_REQUIRE_CATALOG=1 PSTACK_PI_REQUIRE_RUNTIME=1 bun test tests/pi/catalo
 
 Use `PI_PACKAGE_DIR` for a disposable installed package. The typecheck resolves a pinned compiler through `bunx`, so its first run may need network/cache access. The catalog check establishes that IDs exist, not that the account can call every model.
 
-Signed-in/model-backed checks are a separate explicit tier. Examples include `tests/copilot-smoke.sh`, `PSTACK_PI_LIVE=1 bun test tests/pi/live.test.mjs`, and the Claude skill-collision probe. Shipping's disposable live repository test creates, merges, and deletes a repository. None of those should be mistaken for an ordinary offline baseline command. See [contributor checks](../CONTRIBUTING.md#before-you-open-a-pr) for their exact scope.
+Signed-in/model-backed checks are a separate explicit tier. Examples include `tests/copilot-smoke.sh`, `PSTACK_PI_LIVE=1 bun test tests/pi/live.test.mjs`, and the Claude skill-collision probe. The inherited shipping probe deletes its fixture and is excluded from this personal fork's validation workflow. The Claude/Codex live PR test creates and merges a private fixture, then leaves it for manual cleanup. None of those should be mistaken for an ordinary offline baseline command. See [contributor checks](../CONTRIBUTING.md#before-you-open-a-pr) for their exact scope.
 
 ## Verification record
 
@@ -273,6 +273,78 @@ PSTACK_BROWSER=/path/to/chrome-headless-shell PSTACK_LIVE_VERIFICATION=1 bun tes
 The earlier desktop Chrome runs produced actual CLI/API/UI evidence, but one sandboxed Chrome attempt crashed and triggered a macOS error dialog. After the user reported the pop-ups, all browser reruns stopped. The final preflight rejects desktop Chrome and missing browser configuration before installation or process launch; its four regression tests run without a browser. A live rerun with the newly required dedicated headless shell remains unverified. Do not read the earlier browser passes as validation of that final executable choice.
 
 The fixture leaves its reported `pstack-live-<runtime>-*` evidence directory in the system temporary directory. Its app state, browser profiles, owned processes, temporary workspaces, and native fixture registrations are removed. Live dotfiles, credentials, plugin registrations and settings are untouched.
+
+### Issue #10 PR workflows
+
+The installed [PR workflow contract](../plugins/pstack/skills/poteto-mode/references/pr-workflows.md) connects Lauren's opening-a-pr, Babysit, autopilot-full, autopilot-stack and Shipping playbooks to Claude Code and Codex. Five scoped pointers preserve the inherited procedures for other harnesses. The contract keeps separate grants for PR creation, babysitting, full-autopilot landing and operator-landed stacks, and covers native process polling, Git-directory permissions, revision/pending-request guards and stop/resume reconciliation.
+
+Version 0.9.93 and Lauren's pin `8838150c6b4829ea3c01782631213776d86df14a` are unchanged. No forge backend, installer, global configuration or shipping policy engine was added.
+
+| Tier | Observed evidence | Boundary |
+| --- | --- | --- |
+| Ordinary CI | 1,352 root tests pass, 56 opt-in/platform checks skip, zero failures. All 258 helper tests, helper typecheck and formatting pass. Generator and fork-registry checks pass | CI skips native, paid-model and live GitHub execution |
+| Scripted native integrations | Both harnesses pass fresh native plugin installation and separate author, verifier, checkpoint and landing sessions against real local Git and a simulated forge | Native mechanics, not model judgment or live service behavior |
+| Real-model holds | Four fresh sessions preserve withheld landing authority or an operator stop; actual command streams contain only reads/status checks | Local forge; head equals base and independent proof is absent, so authorization is not the sole unmet gate |
+| Real-model local positive workflows | Both harnesses complete authoring, fresh independent review, guarded squash, merged readback and actual destination CLI proof with distinct sessions | One synthetic task; fixture-coordinated roles, not a complete ten-lane model-led autopilot |
+| Live GitHub representative workflows | Both harnesses complete actual red/green Actions, review-comment reply/resolution, a paid independent native-model verdict, posted CLI receipts, current READY/cancellation records, guarded merge and destination confirmation | Most tool sequences are scripted; the independent verifier uses the real native account/model |
+| Live GitHub safety and stacks | Both harnesses pass private two-PR restacks and the approved public equivalents. Public fixtures also prove server rejection of failing required CI and missing approval, and cancellation/readback of an armed auto-merge request | Stack/control sequences are scripted native-tool integration checks. Checkpoints simulate interruption after a merge request; durable scheduling and recovery remain deferred |
+
+Live representative workflows (private fixture links require the owner's access):
+
+| Runtime | PR | Verified head / base | Native model verifier | Confirmed merge |
+| --- | --- | --- | --- | --- |
+| claude | [PR #1](https://github.com/lvieirajr/pstack-pr-workflow-fixture-1e5f2590-ccd0-4028-a7bb-c0c785275ec4/pull/1) | `179b8881d4d50d87c48c4bd20709b8a7c96c9ee9` / `c1422dbbc5e59dd90133b677dfa925d03f3a8da8` | `cadddc46-190d-4c17-a979-fc97722432b6` | `376b170297c187051f623c230b3c94c1ce821d88` |
+| codex | [PR #1](https://github.com/lvieirajr/pstack-pr-workflow-fixture-6a38666b-de0a-4ea9-b221-5bee5758a99c/pull/1) | `87b5b9817288aebbdc04b6e9bb39fa991c1d2d1d` / `bc2bdbfa8e77d6bf650a2abf643303af4f2ab7c4` | `01a159e1-7f1a-7c31-b926-4961b0074332` | `7154a0d1f600582fc0b0cb1d19d27932f0f3e4d2` |
+
+The live-run installed contract SHA256 was `8e58a9606210dbfbc7248520245ea7650b1312da92818bc68263f94f3e52192d`. Each native installation records its own source snapshot, contract hash, phase identities and command receipts. Both native integration checks also passed after final table formatting. Caller review of both real-model tool streams found only reads, actual CLI execution and the authorized proof-artifact write. Separate read-only GitHub commit queries confirmed complete verified/merged tree equality: Claude `f4b8ae0cd4e76e998eb30665ec6ebf1481c3279c`, Codex `bca1d52cc6c4c7aee4f77babadd42b8b54f7294f`.
+
+Live stack evidence:
+
+| Runtime | Visibility | Parent / child PRs | Parent / child merges | Restacked child |
+| --- | --- | --- | --- | --- |
+| claude | private | [parent](https://github.com/lvieirajr/pstack-pr-workflow-fixture-1e5f2590-ccd0-4028-a7bb-c0c785275ec4/pull/3) / [child](https://github.com/lvieirajr/pstack-pr-workflow-fixture-1e5f2590-ccd0-4028-a7bb-c0c785275ec4/pull/4) | `dba16958e7a5e46837ecc425876c9ac3f1fc5610` / `fe715aee479c46ee0c67c24433932bd79a32b9c6` | `9d6ddbabb4d5b5f318f0f54cf19cababef29c503` |
+| codex | private | [parent](https://github.com/lvieirajr/pstack-pr-workflow-fixture-6a38666b-de0a-4ea9-b221-5bee5758a99c/pull/3) / [child](https://github.com/lvieirajr/pstack-pr-workflow-fixture-6a38666b-de0a-4ea9-b221-5bee5758a99c/pull/4) | `6088e19270f14a5aa5022d1c53460b4742adf4fd` / `6f98699b3d0717391b8afd76ff593b1f743d1705` | `db82d85dd24dd765f34806ef60803e95ca93e4fa` |
+| claude | public | [parent](https://github.com/lvieirajr/pstack-pr-workflow-fixture-e511330c-f17f-4a57-a4ea-ca5aa982a7e4/pull/1) / [child](https://github.com/lvieirajr/pstack-pr-workflow-fixture-e511330c-f17f-4a57-a4ea-ca5aa982a7e4/pull/2) | `915c48f09a19c16d76cdda129079756bf51df9d9` / `e1237ebf824de6a9a396a036446e21d4cdf294d9` | `94b84c89f20f1c4e49ab9200cc68cb174ed0d965` |
+| codex | public | [parent](https://github.com/lvieirajr/pstack-pr-workflow-fixture-786c15cf-47d2-47d9-8e50-3fbae6ec78ac/pull/1) / [child](https://github.com/lvieirajr/pstack-pr-workflow-fixture-786c15cf-47d2-47d9-8e50-3fbae6ec78ac/pull/2) | `2ea75d812653b144e1f71e51919195db5bb908a5` / `dcebb34dc3c317519435afcad7d2287c0efa14e5` | `33e4c959294c6b8df1a54fea345188dfdbcc8e96` |
+
+These runs reject changed heads, moved base targets and retargeted destinations. The service's stale-SHA rejection is checked independently of gh's preflight. After the operator stop, both PRs remain open and pending mechanisms are read back absent. A new explicit test grant releases the parent; a fresh native session reconciles the completed merge without retrying it. The root records the old-parent boundary and exact remote lease, replays only the child commit onto the confirmed parent squash, retargets, and requires current Actions and fresh verification in a separate worktree. The child stays open at STACK-READY until a separate operator test grant. Final destination ancestry, content and complete tree equality are checked.
+
+Private branch protection returned HTTP 403 under this account. With the user's explicit approval, two public fixtures containing only the synthetic CLI, tests, CI workflow and generated README exercised the otherwise unavailable service gates. Required CI and approval were enforced for administrators; the test did not self-approve, use `--admin`, or relax another repository's rules. Auto-merge was armed only behind an enforced pending check, cancelled on stop, and confirmed absent before the check was released. The dedicated required-review branch keeps its rules. Public and private visibility must be selected explicitly when reopening a fixture; privacy, owner, numeric ID and description are validated before reuse.
+
+**Remaining limits:** no active merge queue was configured, so active queue removal is covered by helper/native transport tests rather than a live queue. Origin shipping equivalence remains unverified and must stop merge-ready unless its equivalent service guards are established. The tests do not establish automatic skill selection, every model's compliance, or full autonomous ten-lane orchestration. Issues #11-#13 remain deferred; no cloud workers are needed for the checks above.
+
+Earlier local paid runs remain separate evidence: Claude author/verifier/landing sessions `bcebe59d-3558-4c86-a689-c4c68f3768cd`, `098dca64-8df6-4d4d-8b38-d1b5f37a364b`, `6ed96040-cddd-4b04-912a-d67382c9551d`; Codex `01a1599b-c301-7b80-b315-2e6cad7e1da2`, `01a1599e-8a03-7221-89ce-71fab54599bd`, `01a1599f-d6ec-7541-b4fd-7076786dc0fb`. The Claude verifier created and removed an empty scratch file outside its declared fixture scope; that instruction-compliance gap is retained. Initial incomplete local runs are not counted as passes.
+
+The initial live reviews correctly returned FAIL for a synthetic fix that crashed with no CLI argument; neither PR was merged. The fixture now preserves the original no-argument exit behavior, tests it and includes its actual before/after receipts. Other failed setup attempts exposed native keyring lookup under an isolated HOME, stale REST PR base snapshots and an evidence filename collision; those fixture issues were corrected. The installed shipping helper already reads the current base-ref target. Failed-run evidence remains separate from successful runs.
+
+Reproduce only the desired tier:
+
+```shell
+# Real native tools with a scripted provider/local forge, no paid calls.
+PSTACK_NATIVE_PR=1 bun test tests/native-pr-workflow.test.mjs
+# Paid native-model holds and positive local workflows, existing native account.
+PSTACK_MODEL_PR=1 bun test tests/model-pr-gates.test.mjs
+PSTACK_MODEL_PR_WORKFLOW=1 bun test tests/model-pr-workflow.test.mjs
+# Actual GitHub Actions and a paid independent verifier; private by default.
+PSTACK_LIVE_PR=1 bun test tests/live-pr-workflow.test.mjs
+# Explicitly approved public synthetic fixtures can use PSTACK_LIVE_PR_VISIBILITY=public.
+# Map runtime names to the printed repository.json paths in fixture-records.json.
+PSTACK_LIVE_PR_SAFETY=1 PSTACK_LIVE_PR_REPOSITORIES=/path/to/fixture-records.json \
+  bun test tests/live-pr-safety.test.mjs
+```
+
+For a public safety run also set `PSTACK_LIVE_PR_VISIBILITY=public`; the default stays private. Use fresh fixture branches/rules for a complete run. The records map has `claude` and `codex` keys whose values are absolute paths to their printed `repository.json` files. An interrupted run must reconcile actual PR/pending state with the retained records before retrying writes. A retained fixture is never treated as a production target or reused after an identity/privacy mismatch.
+
+The live tiers require existing `repo` and `workflow` scopes, never launch authentication or a browser, and never delete a repository. Native GitHub keyring lookup uses the native HOME; explicit Claude/Codex configuration and Git configuration paths keep the test plugin installation isolated. No credential copying or global signing changes occur. Repository URLs and manual-cleanup status are printed on success/failure; temporary local plugin/workspace state is removed while command/source/reviewer/failure evidence remains in the printed private evidence directory. The inherited deletion-capable live probe is excluded.
+
+Manual cleanup remains with the user. These six explicitly owned test repositories remain:
+
+- [lvieirajr/pstack-pr-workflow-fixture-1e5f2590-ccd0-4028-a7bb-c0c785275ec4](https://github.com/lvieirajr/pstack-pr-workflow-fixture-1e5f2590-ccd0-4028-a7bb-c0c785275ec4)
+- [lvieirajr/pstack-pr-workflow-fixture-6a38666b-de0a-4ea9-b221-5bee5758a99c](https://github.com/lvieirajr/pstack-pr-workflow-fixture-6a38666b-de0a-4ea9-b221-5bee5758a99c)
+- [lvieirajr/pstack-pr-workflow-fixture-d91281c5-cbe4-4fe3-8f15-cb3360d56989](https://github.com/lvieirajr/pstack-pr-workflow-fixture-d91281c5-cbe4-4fe3-8f15-cb3360d56989)
+- [lvieirajr/pstack-pr-workflow-fixture-023dcf5b-d66d-4e4d-b89c-e71e06a3a19e](https://github.com/lvieirajr/pstack-pr-workflow-fixture-023dcf5b-d66d-4e4d-b89c-e71e06a3a19e)
+- [lvieirajr/pstack-pr-workflow-fixture-e511330c-f17f-4a57-a4ea-ca5aa982a7e4](https://github.com/lvieirajr/pstack-pr-workflow-fixture-e511330c-f17f-4a57-a4ea-ca5aa982a7e4)
+- [lvieirajr/pstack-pr-workflow-fixture-786c15cf-47d2-47d9-8e50-3fbae6ec78ac](https://github.com/lvieirajr/pstack-pr-workflow-fixture-786c15cf-47d2-47d9-8e50-3fbae6ec78ac)
 
 ## Workflow acceptance scenarios
 

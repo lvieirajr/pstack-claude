@@ -1,5 +1,7 @@
 ### Opening a PR
 
+On Claude Code and Codex, follow the [native PR workflow contract](../references/pr-workflows.md) for installed helpers, task authority, reviewer evidence, process handles, and interrupted or stopped landing. Other harnesses retain the inherited procedure.
+
 Invoked at the end of every other playbook.
 
 **Worktree.** Work from a git worktree off main. Subagents inherit it. Multiple `Agent` calls on the same branch each get their own worktree, or `git fetch && git reset --hard origin/<branch>` between them. Dirty branch with unrelated work: patch out, fresh worktree, apply. Snarled worktree: reset from main, redo minimally. Before you commit, merge, or deploy from a worktree, list the live agents and stop every one that holds it, including grandchildren you never launched. A delegate's children do not inherit its brief, so a read-only instruction never reaches them. Confirm each stop, then run `git status` and read the tree you are about to ship.
