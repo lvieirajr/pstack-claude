@@ -9,6 +9,8 @@ On Codex, read the [platform mapping](../poteto-mode/references/codex-tools.md),
 
 On GitHub Copilot, read the [platform mapping](../poteto-mode/references/copilot-tools.md), including its per-skill notes, before following this skill.
 
+On Claude Code and Codex, follow the [native delegation contract](../poteto-mode/references/delegation.md) for worker capacity, lifecycle, installed source identity, and independent review. It takes precedence over the launch-all-at-once and native dispatch details below; the workflow and required evidence stay the same. Other harnesses retain the inherited procedure.
+
 Spawn one reviewer per configured model to adversarially review code changes. The adversarial signal comes from model diversity, not assigned personas. The deliverable is a synthesized verdict. Do NOT auto-apply changes.
 
 ## Step 1, Scope

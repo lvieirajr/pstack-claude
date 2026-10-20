@@ -188,6 +188,16 @@ On Claude Code and Codex, [the installed autonomy contract](../plugins/pstack/sk
 
 `/setup-pstack` already offers the persistent `session hook: on/off` routing choice. Automatic routing remains an inherited, selectable difference from Lauren's invocation-based setup; turning it off removes the startup mandate while leaving skills available. Routing never grants merge authority. See the [fork-policy audit](workflow-policy.md) for retained differences and their source revisions.
 
+## Delegation and independent review
+
+On Claude Code and Codex, the installed [native delegation contract](../plugins/pstack/skills/poteto-mode/references/delegation.md) adapts worker execution while preserving each workflow's phases, evidence, and independent verdicts. Arena, swarm, interrogate, how, reflect, and orchestration point to it. Other harnesses retain their inherited procedure.
+
+Required logical lanes are queued within observed native capacity. A smaller concurrency limit does not reduce ten required scenarios to two results. Writers own separate worktrees and branches; stop confirmation and background-process reconciliation precede ownership reuse. Recovery treats interrupted workers as unknown until reconciled. A completion notification, previous-state reply, or changed transcript timestamp cannot establish shutdown.
+
+Pass children the exact enabled plugin paths and source hashes. Version alone cannot distinguish this fork's development commits. Reviewers retain separate identities and current input revisions; model diversity follows the existing model-selection contract. A missing independent reviewer blocks dependent completion and shipping. Read-only instructions do not create a sandbox or a missing native tool.
+
+Opt-in native checks use both installed CLIs with disposable homes and Git marketplace/worktree fixtures. Responses come from localhost scripts, not external models. Run `PSTACK_NATIVE_DELEGATION=1 bun test tests/native-delegation.test.mjs`. The [compatibility record](compatibility-baseline.md#issue-8-native-delegation) separates native mechanics from complete model-driven panels.
+
 ## History and transcripts
 
 Claude Code and Codex use the installed [native history contract](../plugins/pstack/skills/poteto-mode/references/history.md) for recall, habit mining, reflection, decision-trail audits, Eval, and transcript fallback during session pickup. The checkpoint remains the first source for pickup. User instructions retain precedence; missing transcript evidence stays visible.

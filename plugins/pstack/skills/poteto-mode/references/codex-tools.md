@@ -16,6 +16,8 @@ pstack skills are written in Claude Code tool language (the `Skill` tool, the `A
 | Dispatch a subagent (the `Agent`/`Task` tool) | `spawn_agent` |
 | Dispatch N parallel subagents in one turn | N `spawn_agent` calls in one response |
 | Wait for a subagent result | `wait_agent` |
+| Message / follow up | The exposed `send_input`, `send_message`, or `followup_task`; inspect whether it queues or starts a turn. |
+| Interrupt / stop | The exposed interrupt, stop, or close action; confirm shutdown separately from the returned previous state. |
 | Free a finished subagent slot | `close_agent`, when the session exposes it. Some Codex hosts don't. |
 | Track tasks (the todolist; `TaskCreate` / `TaskUpdate`, or `TodoWrite` on Claude Code) | `update_plan` |
 | Ask the human a fixed-choice question (`AskUserQuestion`) | Use a question tool when this host exposes one; otherwise ask in plain text and let the user answer. |
@@ -34,6 +36,8 @@ When `spawn_agent` is unavailable or delegation is prohibited, the fan-out skill
 Enabling agents does not lift the host's thread limit. A thread-limit error from `spawn_agent` is a capacity error, not a rejected model slug, so changing the requested model cannot resolve it. After the first capacity rejection, stop spawning. Close a finished agent with `close_agent` before you try again, and where the session has no `close_agent`, do not assume a finished agent's slot is free.
 
 ## Subagent policy
+
+Follow the [native delegation contract](delegation.md) for queued logical lanes, current native schemas, child source identity, cancellation, and interrupted-session recovery. Native tool names may be namespaced, and shell tools may run through `functions.exec`. Logical task paths returned by some hosts are lifecycle addresses, not persisted thread UUIDs; follow the history contract for any separate export identity. Treat a missing close/release action as a capacity limitation, and preserve required independent review.
 
 poteto-mode's Subagents section sets Claude-specific defaults (`subagent_type: "pstack:poteto-agent"`, `run_in_background: true`). On Codex:
 

@@ -149,6 +149,291 @@ describe("Claude history identity and active branches", () => {
     expect(result.records.map((x) => x.uuid)).toEqual(["a", "kept"]);
     expect(result.records[1].message.content[0].name).toBe("Read");
   });
+  test("attachment tips do not hide a continuing child conversation or its tool results", async () => {
+    const f = fixture();
+    const attachment = (uuid, parentUuid) =>
+      f.message(uuid, parentUuid, { type: "attachment", message: undefined });
+    const tool = (uuid, parentUuid, id) =>
+      f.message(uuid, parentUuid, {
+        type: "assistant",
+        message: {
+          role: "assistant",
+          content: [{ type: "tool_use", id, name: "Read", input: {} }],
+        },
+      });
+    const result = (uuid, parentUuid, id) =>
+      f.message(uuid, parentUuid, {
+        message: {
+          role: "user",
+          content: [{ type: "tool_result", tool_use_id: id, content: "read" }],
+        },
+      });
+    const file = f.save("run.jsonl", [
+      f.message("start", null),
+      tool("first", "start", "call-1"),
+      attachment("side", "first"),
+      result("result-1", "first", "call-1"),
+      attachment("linked", "result-1"),
+      tool("second", "linked", "call-2"),
+      result("result-2", "second", "call-2"),
+      f.message("final", "result-2", { type: "assistant" }),
+      attachment("tail", "final"),
+    ]);
+    const selected = await readClaude(f.workspace, { file });
+    expect(selected.branchLeafId).toBe("final");
+    expect(selected.records.map((r) => r.uuid)).toEqual([
+      "start",
+      "first",
+      "result-1",
+      "linked",
+      "second",
+      "result-2",
+      "final",
+    ]);
+    const blocks = selected.records.flatMap((r) => r.message?.content ?? []);
+    expect(
+      blocks.filter((b) => b.type === "tool_use").map((b) => b.id),
+    ).toEqual(["call-1", "call-2"]);
+    expect(
+      blocks.filter((b) => b.type === "tool_result").map((b) => b.tool_use_id),
+    ).toEqual(["call-1", "call-2"]);
+  });
+  test("the native active-leaf marker resolves branches and an explicit leaf takes precedence", async () => {
+    const f = fixture(),
+      file = f.save("run.jsonl", [
+        f.message("start", null),
+        f.message("alternative", "start"),
+        f.message("kept", "start"),
+        f.message("stop", "kept", {
+          type: "system",
+          subtype: "stop_hook_summary",
+        }),
+        { type: "last-prompt", sessionId: "run", leafUuid: "stop" },
+        { type: "cost-state" },
+      ]);
+    const selected = await readClaude(f.workspace, { file });
+    expect(selected.branchLeafId).toBe("stop");
+    expect(selected.records.map((r) => r.uuid)).toEqual([
+      "start",
+      "kept",
+      "stop",
+    ]);
+    expect(
+      (
+        await readClaude(f.workspace, { file, leaf: "alternative" })
+      ).records.map((r) => r.uuid),
+    ).toEqual(["start", "alternative"]);
+  });
+  test("invalid or stale native leaf markers and cyclic attachment chains fail closed", async () => {
+    const f = fixture();
+    for (const value of [null, 42, "", "missing", "start"]) {
+      const file = f.save("run.jsonl", [
+        f.message("start", null),
+        f.message("end", "start"),
+        { type: "last-prompt", sessionId: "run", leafUuid: value },
+      ]);
+      await expect(readClaude(f.workspace, { file })).rejects.toThrow();
+    }
+    const stale = f.save("run.jsonl", [
+      f.message("start", null),
+      f.message("old-stop", "start", { type: "system" }),
+      { type: "last-prompt", sessionId: "run", leafUuid: "old-stop" },
+      f.message("new", "start"),
+    ]);
+    await expect(readClaude(f.workspace, { file: stale })).rejects.toThrow(
+      "stale",
+    );
+    const cycle = f.save("run.jsonl", [
+      f.message("a", "b", { type: "attachment" }),
+      f.message("b", "a", { type: "attachment" }),
+      f.message("end", "a"),
+    ]);
+    await expect(readClaude(f.workspace, { file: cycle })).rejects.toThrow(
+      "cycle",
+    );
+  });
+  test("split blocks of one native assistant message retain parallel tool calls and results", async () => {
+    const f = fixture();
+    const chunk = (uuid, parentUuid, call) =>
+      f.message(uuid, parentUuid, {
+        type: "assistant",
+        message: {
+          id: "native-message",
+          role: "assistant",
+          content: [{ type: "tool_use", id: call, name: "Read", input: {} }],
+        },
+      });
+    const result = (uuid, parentUuid, call) =>
+      f.message(uuid, parentUuid, {
+        message: {
+          role: "user",
+          content: [
+            { type: "tool_result", tool_use_id: call, content: "read" },
+          ],
+        },
+      });
+    const file = f.save("run.jsonl", [
+      f.message("start", null),
+      chunk("a", "start", "call-a"),
+      chunk("b", "a", "call-b"),
+      result("result-a", "a", "call-a"),
+      result("result-b", "b", "call-b"),
+      f.message("done", "result-a", { type: "assistant" }),
+    ]);
+    const selected = await readClaude(f.workspace, { file });
+    expect(selected.branchLeafId).toBe("done");
+    expect(selected.records.map((r) => r.uuid)).toEqual([
+      "start",
+      "a",
+      "b",
+      "result-a",
+      "result-b",
+      "done",
+    ]);
+    const blocks = selected.records.flatMap((r) => r.message?.content ?? []);
+    expect(
+      blocks.filter((b) => b.type === "tool_use").map((b) => b.id),
+    ).toEqual(["call-a", "call-b"]);
+    expect(
+      blocks.filter((b) => b.type === "tool_result").map((b) => b.tool_use_id),
+    ).toEqual(["call-a", "call-b"]);
+  });
+  test("parallel reconstruction cannot merge a different assistant message or conflicting tool results", async () => {
+    const f = fixture();
+    const chunk = (uuid, parentUuid, call, nativeId) =>
+      f.message(uuid, parentUuid, {
+        type: "assistant",
+        message: {
+          id: nativeId,
+          role: "assistant",
+          content: [{ type: "tool_use", id: call, name: "Read", input: {} }],
+        },
+      });
+    const result = (uuid, parentUuid, call) =>
+      f.message(uuid, parentUuid, {
+        message: {
+          role: "user",
+          content: [
+            { type: "tool_result", tool_use_id: call, content: "read" },
+          ],
+        },
+      });
+    const records = [
+      f.message("start", null),
+      chunk("a", "start", "call-a", "first"),
+      chunk("b", "a", "call-b", "other"),
+      result("result-a", "a", "call-a"),
+      result("result-b", "b", "call-b"),
+      f.message("done", "result-a", { type: "assistant" }),
+    ];
+    const file = f.save("run.jsonl", records);
+    await expect(readClaude(f.workspace, { file })).rejects.toThrow(
+      "ambiguous",
+    );
+    expect(
+      (await readClaude(f.workspace, { file, leaf: "done" })).records.map(
+        (r) => r.uuid,
+      ),
+    ).toEqual(["start", "a", "result-a", "done"]);
+    records[2].message.id = "first";
+    records.push(result("conflicting-result", "b", "call-b"));
+    f.save("run.jsonl", records);
+    await expect(readClaude(f.workspace, { file })).rejects.toThrow(
+      "ambiguous",
+    );
+  });
+  test("matching API message IDs cannot combine genuine assistant forks", async () => {
+    const f = fixture();
+    const chunk = (uuid, call, identity) =>
+      f.message(uuid, "start", {
+        type: "assistant",
+        ...identity,
+        message: {
+          id: "same-api-id",
+          role: "assistant",
+          content: [{ type: "tool_use", id: call, name: "Read", input: {} }],
+        },
+      });
+    const result = (uuid, parentUuid, call) =>
+      f.message(uuid, parentUuid, {
+        message: {
+          role: "user",
+          content: [
+            { type: "tool_result", tool_use_id: call, content: "read" },
+          ],
+        },
+      });
+    for (const [a, b] of [
+      [{}, {}],
+      [{ apiBlockIndex: 0 }, { apiBlockIndex: 0 }],
+      [
+        { apiBlockIndex: 0, requestId: "first" },
+        { apiBlockIndex: 1, requestId: "other" },
+      ],
+      [{ apiBlockIndex: 0 }, {}],
+    ]) {
+      const file = f.save("run.jsonl", [
+        f.message("start", null),
+        chunk("a", "call-a", a),
+        chunk("b", "call-b", b),
+        result("result-a", "a", "call-a"),
+        result("result-b", "b", "call-b"),
+        f.message("done", "result-a", { type: "assistant" }),
+      ]);
+      await expect(readClaude(f.workspace, { file })).rejects.toThrow(
+        "ambiguous",
+      );
+      expect(
+        (await readClaude(f.workspace, { file, leaf: "done" })).records.map(
+          (r) => r.uuid,
+        ),
+      ).toEqual(["start", "a", "result-a", "done"]);
+    }
+  });
+  test("unique native block indices bind parallel assistant paths to one response", async () => {
+    const f = fixture();
+    const chunk = (uuid, index, call) =>
+      f.message(uuid, "start", {
+        type: "assistant",
+        apiBlockIndex: index,
+        requestId: "request",
+        message: {
+          id: "native-message",
+          role: "assistant",
+          content: [{ type: "tool_use", id: call, name: "Read", input: {} }],
+        },
+      });
+    const result = (uuid, parentUuid, call) =>
+      f.message(uuid, parentUuid, {
+        message: {
+          role: "user",
+          content: [
+            { type: "tool_result", tool_use_id: call, content: "read" },
+          ],
+        },
+      });
+    const file = f.save("run.jsonl", [
+      f.message("start", null),
+      chunk("a", 0, "call-a"),
+      chunk("b", 1, "call-b"),
+      result("result-a", "a", "call-a"),
+      result("result-b", "b", "call-b"),
+      f.message("done", "result-a", { type: "assistant" }),
+    ]);
+    const selected = await readClaude(f.workspace, { file });
+    expect(selected.records.map((r) => r.uuid)).toEqual([
+      "start",
+      "a",
+      "b",
+      "result-a",
+      "result-b",
+      "done",
+    ]);
+    const blocks = selected.records.flatMap((r) => r.message?.content ?? []);
+    expect(
+      blocks.filter((b) => b.type === "tool_result").map((b) => b.tool_use_id),
+    ).toEqual(["call-a", "call-b"]);
+  });
   test("missing parents, cycles, malformed records, and conflicting IDs fail closed", async () => {
     const f = fixture();
     for (const records of [

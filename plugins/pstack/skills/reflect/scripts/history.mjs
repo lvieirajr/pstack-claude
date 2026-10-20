@@ -137,6 +137,9 @@ export async function readClaude(
     );
   const entries = new Map(),
     parents = new Set();
+  let nativeLeaf,
+    nativeLeafSeen = false,
+    nativeLeafStale = false;
   for (const line of raw.split("\n").filter((line) => line.trim())) {
     let record;
     try {
@@ -150,7 +153,13 @@ export async function readClaude(
       throw new Error("Claude transcript crosses workspace boundaries");
     if (record.sessionId && record.sessionId !== run.sessionId)
       throw new Error("Claude transcript contains conflicting session IDs");
+    if (record.type === "last-prompt" && Object.hasOwn(record, "leafUuid")) {
+      nativeLeaf = record.leafUuid;
+      nativeLeafSeen = true;
+      nativeLeafStale = false;
+    }
     if (typeof record.uuid !== "string") continue;
+    if (nativeLeafSeen) nativeLeafStale = true;
     if (
       entries.has(record.uuid) &&
       JSON.stringify(entries.get(record.uuid)) !== JSON.stringify(record)
@@ -159,14 +168,144 @@ export async function readClaude(
     entries.set(record.uuid, record);
     if (record.parentUuid) parents.add(record.parentUuid);
   }
-  const leaves = [...entries.keys()].filter((id) => !parents.has(id));
-  if (!leaf && leaves.length !== 1)
+  // Native streaming splits one assistant message into UUID blocks; parallel
+  // results can attach to different blocks of that same message.
+  const blocks = (r) =>
+    Array.isArray(r.message?.content) ? r.message.content : [];
+  const chunks = new Map(),
+    resultCounts = new Map(),
+    callCounts = new Map();
+  const pureResult = (r) =>
+    r.type === "user" &&
+    blocks(r).length > 0 &&
+    blocks(r).every(
+      (b) => b.type === "tool_result" && typeof b.tool_use_id === "string",
+    );
+  const parentOf = (record) => {
+    let parent = record.parentUuid;
+    const seen = new Set();
+    while (entries.get(parent)?.type === "attachment") {
+      if (seen.has(parent))
+        throw new Error("Claude attachment lineage has a cycle");
+      seen.add(parent);
+      parent = entries.get(parent).parentUuid;
+    }
+    return parent;
+  };
+  for (const record of entries.values()) {
+    if (
+      record.type === "assistant" &&
+      typeof record.message?.id === "string" &&
+      record.message.id
+    ) {
+      const group = chunks.get(record.message.id) ?? [];
+      group.push(record);
+      chunks.set(record.message.id, group);
+    }
+    for (const block of blocks(record)) {
+      if (block.type === "tool_use")
+        callCounts.set(block.id, (callCounts.get(block.id) ?? 0) + 1);
+      if (block.type === "tool_result")
+        resultCounts.set(
+          block.tool_use_id,
+          (resultCounts.get(block.tool_use_id) ?? 0) + 1,
+        );
+    }
+  }
+  const batches = new Map();
+  for (const group of chunks.values()) {
+    const calls = new Set(
+      group
+        .flatMap(blocks)
+        .filter((b) => b.type === "tool_use")
+        .map((b) => b.id),
+    );
+    if (
+      [...calls].some(
+        (id) =>
+          typeof id !== "string" ||
+          callCounts.get(id) !== 1 ||
+          (resultCounts.get(id) ?? 0) > 1,
+      )
+    )
+      continue;
+    const members = [
+      ...group,
+      ...[...entries.values()].filter(
+        (r) =>
+          pureResult(r) && blocks(r).every((b) => calls.has(b.tool_use_id)),
+      ),
+    ];
+    if (members.length < 2) continue;
+    const ids = new Set(members.map((r) => r.uuid));
+    if (
+      new Set(group.map((r) => r.requestId).filter((id) => id != null)).size > 1
+    )
+      continue;
+    if (group.some((r) => Object.hasOwn(r, "apiBlockIndex"))) {
+      const indices = group.map((r) => r.apiBlockIndex);
+      if (
+        !indices.every((i) => Number.isInteger(i) && i >= 0) ||
+        new Set(indices).size !== group.length
+      )
+        continue;
+    } else {
+      // Without native block indices, only one assistant chain is attributable.
+      const chunkIds = new Set(group.map((r) => r.uuid));
+      const chunkParents = group.map((record) => {
+        let parent = parentOf(record);
+        const visited = new Set();
+        while (ids.has(parent) && !chunkIds.has(parent)) {
+          if (visited.has(parent))
+            throw new Error("Claude parallel result lineage has a cycle");
+          visited.add(parent);
+          parent = parentOf(entries.get(parent));
+        }
+        return parent;
+      });
+      const internal = chunkParents.filter((id) => chunkIds.has(id));
+      if (
+        chunkParents.length - internal.length !== 1 ||
+        new Set(internal).size !== internal.length
+      )
+        continue;
+    }
+    const origins = new Set(members.map(parentOf).filter((id) => !ids.has(id)));
+    if (origins.size !== 1) continue;
+    for (const id of ids) batches.set(id, ids);
+  }
+  // Attachment tips and completed parallel batches are not alternate branches.
+  const conversationParents = new Set();
+  for (const record of entries.values()) {
+    if (record.type === "attachment") continue;
+    const parent = parentOf(record);
+    if (parent) conversationParents.add(parent);
+    const batch = batches.get(parent);
+    if (batch && !batch.has(record.uuid))
+      for (const member of batch) conversationParents.add(member);
+  }
+  const leaves = [...entries.keys()].filter(
+    (id) =>
+      entries.get(id).type !== "attachment" && !conversationParents.has(id),
+  );
+  if (
+    !leaf &&
+    nativeLeafSeen &&
+    (typeof nativeLeaf !== "string" || !nativeLeaf || nativeLeafStale)
+  )
+    throw new Error("Claude native active-leaf marker is invalid or stale");
+  const selectedLeaf = leaf ?? (nativeLeafSeen ? nativeLeaf : undefined);
+  if (!selectedLeaf && leaves.length !== 1)
     throw new Error(
       `Claude active branch is ${leaves.length ? "ambiguous" : "unavailable"}; use the native active leaf with --leaf or supply an active-branch export`,
     );
-  if (leaf && !leaves.includes(leaf))
+  if (
+    selectedLeaf &&
+    !leaves.includes(selectedLeaf) &&
+    (!entries.has(selectedLeaf) || parents.has(selectedLeaf))
+  )
     throw new Error("Requested Claude message is not a branch leaf");
-  const branchLeafId = leaf ?? leaves[0],
+  const branchLeafId = selectedLeaf ?? leaves[0],
     records = [],
     seen = new Set();
   let id = branchLeafId;
@@ -181,15 +320,37 @@ export async function readClaude(
     id = record.parentUuid ?? null;
   }
   records.reverse();
+  const expanded = [],
+    added = new Set();
+  const append = (start) => {
+    const chain = [],
+      visiting = new Set();
+    let id = start;
+    while (id != null && !added.has(id)) {
+      if (visiting.has(id) || !entries.has(id))
+        throw new Error(
+          "Claude branch has a cycle or missing parent; complete lineage is unavailable",
+        );
+      visiting.add(id);
+      chain.push(entries.get(id));
+      id = entries.get(id).parentUuid;
+    }
+    for (const record of chain.reverse()) {
+      added.add(record.uuid);
+      expanded.push(record);
+    }
+  };
+  for (const record of records)
+    for (const id of batches.get(record.uuid) ?? [record.uuid]) append(id);
   const limitations = [];
   if (
-    !records.some(
+    !expanded.some(
       (record) => record.type === "user" || record.type === "assistant",
     )
   )
     throw new Error("Claude branch contains no conversation messages");
   if (
-    records.some(
+    expanded.some(
       (record) =>
         record.isCompactSummary || record.subtype === "compact_boundary",
     )
@@ -203,7 +364,7 @@ export async function readClaude(
     updatedAt: after.mtime.toISOString(),
     capturedAt: new Date().toISOString(),
     limitations,
-    records,
+    records: expanded,
   };
 }
 

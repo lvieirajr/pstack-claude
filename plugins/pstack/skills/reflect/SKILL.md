@@ -9,6 +9,8 @@ On Codex, read the [platform mapping](../poteto-mode/references/codex-tools.md),
 
 On GitHub Copilot, read the [platform mapping](../poteto-mode/references/copilot-tools.md), including its per-skill notes, before following this skill.
 
+On Claude Code and Codex, follow the [native delegation contract](../poteto-mode/references/delegation.md) for worker capacity, lifecycle, installed source identity, and independent review. It takes precedence over the launch-all-at-once and native dispatch details below; the workflow and required evidence stay the same. Other harnesses retain the inherited procedure.
+
 Mine the current conversation for durable learnings, then route them into skill edits.
 
 Invoke when the user says "reflect" or "/reflect". Skip when the conversation is trivial, off-topic, or already covered by an existing skill the parent followed correctly. One-offs are not learnings.
