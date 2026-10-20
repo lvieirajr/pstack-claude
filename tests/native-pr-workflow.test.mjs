@@ -33,7 +33,7 @@ for (const runtime of ["claude", "codex"])
         const toolsDir = join(f.plugin, "skills/poteto-mode/scripts/watch-pr");
         // Warm the installed package's own dependency bootstrap, not checkout imports.
         f.env.BUN_INSTALL_CACHE_DIR =
-          process.env.BUN_INSTALL_CACHE_DIR ?? "/tmp/pstack-issue6-bun-cache";
+          process.env.BUN_INSTALL_CACHE_DIR ?? "/tmp/pstack-bun-cache";
         f.run("bun", [join(toolsDir, "ship-pr"), "--help"]);
         const bin = join(f.root, "bin");
         mkdirSync(bin);

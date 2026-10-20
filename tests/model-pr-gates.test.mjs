@@ -70,7 +70,7 @@ for (const runtime of ["claude", "codex"])
           "skills/poteto-mode/references/pr-workflows.md",
         );
         f.env.BUN_INSTALL_CACHE_DIR =
-          process.env.BUN_INSTALL_CACHE_DIR ?? "/tmp/pstack-issue6-bun-cache";
+          process.env.BUN_INSTALL_CACHE_DIR ?? "/tmp/pstack-bun-cache";
         f.run("bun", [
           join(f.plugin, "skills/poteto-mode/scripts/watch-pr/ship-pr"),
           "--help",
