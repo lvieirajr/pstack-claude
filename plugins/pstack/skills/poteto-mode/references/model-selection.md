@@ -8,7 +8,7 @@ A saved role override wins. Otherwise ordinary default/worker roles use `inherit
 
 Strongest judgment roles and panels require confirmed native choices. Shipped values are examples, not evidence of account access or which model is strongest. Check the resolved model and reasoning level against the current schema, catalog and native agent configuration. Report unavailable selectors, unsupported choices or access failures; do not silently substitute models or drop effort settings.
 
-`session` means no reasoning override: inherit on the same model; after switching models use the selected model's native default unless explicitly configured. Supported effort levels vary by model and harness.
+On Claude Code, `session` means no reasoning override: inherit on the same model; after switching models use the selected model's native default unless explicitly configured. On Codex, resolve `session` to the active turn's effort with the helper in [codex-tools.md](codex-tools.md) and pass it as `reasoning_effort`. Supported effort levels vary by model and harness.
 
 ## Panels and review gates
 

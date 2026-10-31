@@ -27,7 +27,7 @@ The Live column records the end-to-end run on real Pi with `PSTACK_PI_LIVE=1` (`
 | T10 | Deferred tool loading (`ToolSearch`) | Every pstack tool registers at startup with `model-only` exposure, so Pi declares it to the model from the first turn, in every `codemode.mode`, and `tool_search` never has to load it | extension | `every pstack tool is model-only, so Pi declares it to the model in every codemode mode and never defers it` | VERIFIED |
 | T11 | `Skill` tool and `/command` | Pi lists skills in the system prompt; `/skill:<name>` forces one | native | Pi docs/skills.md | n/a |
 | T12 | `pstack:` skill namespace | Skills load under their bare names and run as `/skill:<name>`; agent types keep `pstack:` | difference | Command spelling only. Skills name each other by bare name in prose, and agent types resolve with the prefix. | n/a |
-| T13 | `AskUserQuestion` | `ask_user_question` with the same shape; without a UI, and in a child agent, it fails and tells the model to ask in plain text | extension | `a single-select question returns the chosen label` | n/a |
+| T13 | `AskUserQuestion` | `ask_user_question` with the same shape; without a UI, and in a child agent, it fails and tells the model to ask in plain text. `pi ask tool: off` in the override sheet skips the registration, so another extension can own the name | extension | `a single-select question returns the chosen label` | n/a |
 | T14 | `TaskCreate`/`TaskUpdate`/`TodoWrite` | poteto-mode's own `todo.md` fallback | mapping | poteto-mode Platform Adaptation; pi-tools.md Tool actions | n/a |
 | T15 | `Read`/`Edit`/`Write`/`Bash`/`Grep`/`Glob` | `read`, `edit`, `write`, `bash`; `grep`, `find`, `ls` when enabled | native | pi-tools.md Tool actions | n/a |
 | T16 | `WebFetch`/`WebSearch` | `curl` through `bash`; web search through an MCP server | difference | No skill names either tool. Fetching works through `bash`. | n/a |
@@ -48,12 +48,12 @@ The Live column records the end-to-end run on real Pi with `PSTACK_PI_LIVE=1` (`
 | H04 | Override sheet plus `@` include | The extension adds the whole sheet to the system prompt, children included | extension | `a child pi gets the sheet but not the mandate` | VERIFIED |
 | H05 | `CLAUDE.md` instructions file | Pi loads `AGENTS.md` or `CLAUDE.md` per directory, plus `~/.pi/agent/AGENTS.md` | native | pi-tools.md Instructions file | n/a |
 | H06 | `.claude/settings.local.json` env for todo tools | Pi has no todo tools; the `todo.md` fallback applies | n/a | poteto-mode Platform Adaptation | n/a |
-| F01 | `~/.claude/projects` transcripts | `find-transcript.mjs` reads Pi sessions and follows the active branch | script | `a Pi session's opening prompt is the first user message on the branch that ends at the last entry` | VERIFIED |
+| F01 | `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects` transcripts | `find-transcript.mjs` reads Pi sessions and follows the active branch | script | `a Pi session's opening prompt is the first user message on the branch that ends at the last entry` | VERIFIED |
 | F07 | Own transcript as evidence | Same reader; `worktree-audit.mjs` scans Pi session roots | script | `a Pi session in a second transcripts root marks the worktree it ran in as a recent chat` | n/a |
 | F02 | `.claude/skills/` project and user skills | `.pi/skills/` or `.agents/skills/` | mapping | pi-tools.md `create-verification-skill` note | n/a |
-| F03 | `~/.claude/plugins/` install path | Skill files load from the Pi package directory that `pi list` shows | mapping | pi-tools.md `reflect` note | n/a |
+| F03 | `${CLAUDE_CODE_PLUGIN_CACHE_DIR:-${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins}/` install path | Skill files load from the Pi package directory that `pi list` shows | mapping | pi-tools.md `reflect` note | n/a |
 | F04 | `~/.claude/orchestrate/<slug>/` store | A plain directory, used unchanged | native | orchestrate playbook | n/a |
-| F05 | `~/.claude/shell-snapshots/` cleanup advice | Cleanup advice only | n/a | worktree-cleanup playbook | n/a |
+| F05 | `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/shell-snapshots/` cleanup advice | Cleanup advice only | n/a | worktree-cleanup playbook | n/a |
 | F06 | `.claude/worktrees` | The extension uses the same path | extension | `keeps a worktree with changes and reports its path and branch` | n/a |
 | S01 | Bundled `run` skill | Run the app through `bash` | mapping | pi-tools.md Driver and bundled skills | n/a |
 | S02 | `verify` skill | Read the project skill by path or add it to Pi's `skills` setting | mapping | pi-tools.md Driver and bundled skills | n/a |

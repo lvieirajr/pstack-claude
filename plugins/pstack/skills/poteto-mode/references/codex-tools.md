@@ -43,7 +43,9 @@ poteto-mode's Subagents section sets Claude-specific defaults (`subagent_type: "
 
 - There is no `poteto-agent` subagent type. Route an ad-hoc subagent through poteto-mode's style by dispatching a `spawn_agent` whose instructions tell it to read the `poteto-mode` skill in full first.
 - `spawn_agent` calls already run concurrently with your turn, so `run_in_background: true` has no separate flag. Issue the dispatch and continue.
-- When a role value carries `@<level>`, or the `default effort` line names a level, pass it through the host's native reasoning selector only when exposed and supported. Respect any requirement for a fresh context when selecting a model or effort. If the host or native agent configuration cannot honor the choice, report that limitation before dispatch; do not silently ignore it. `session` passes no `reasoning_effort`.
+- For `session`, run `node <poteto-mode-dir>/scripts/codex-session-effort.mjs` before dispatching, with `<poteto-mode-dir>` resolved to this skill's directory. The [helper](../scripts/codex-session-effort.mjs) reads the active turn's effort from the exact runtime log identified by `CODEX_THREAD_ID`, under `$CODEX_HOME/sessions` (default `~/.codex/sessions`). It prints only the effort. Run it again on each turn; a UI effort change must not reuse the previous turn's value.
+- Apply poteto-mode's task adjustment to that starting level, or to the explicit role/default effort, then pass the final level as `reasoning_effort` on `spawn_agent`, including when a model is selected explicitly. An omitted effort can use a configured subagent effort or, when a model is selected, that model's default instead of the parent's level.
+- Do not guess the session's effort from the model, a config default, or a previous turn. If the helper cannot identify the active turn's effort, ask for an explicit role or `default effort` level before dispatching. Do not substitute an omitted `reasoning_effort` for the missing starting level. Automatic `session` resolution depends on the host exposing the current thread's runtime log; it is not available on every Codex host.
 - There is no `comment-sicko` subagent type either. The **no-comments** skill spawns it on Claude Code; on Codex dispatch a `spawn_agent` whose instructions tell it to read `poteto-mode/references/agents/comment-sicko.md` in full first.
 - There are no `thermo-nuclear-review-subagent` or `thermo-nuclear-code-quality-review-subagent` types. The **thermos** skill spawns both on Claude Code; on Codex dispatch two `spawn_agent` calls whose instructions tell each to read the `thermo-nuclear-review` or `thermo-nuclear-code-quality-review` skill in full first and review only the diff and file contents in its prompt.
 - Claude Code runs every subagent on this machine, so the **swarm** skill's workers and the fan-out playbooks (`orchestrate`, `autopilot-full`, `autopilot-stack`) isolate writers with worktrees. The same holds on Codex.
@@ -53,7 +55,7 @@ poteto-mode's Subagents section sets Claude-specific defaults (`subagent_type: "
 
 Follow the [model selection contract](model-selection.md). Ordinary single-model roles, including worker roles (`feature, refactoring`), inherit the session model unless explicitly configured. Do not translate inheritance into a fixed OpenAI model.
 
-The strongest judgment role (`strongest judgment`) needs the user's confirmed strongest available Codex model; `gpt-6-astra` is an example, not an automatic selection. The example panel is `gpt-6-astra`, `gpt-6-sol`, `gpt-6-luna`. Confirm each model against the active harness and account before using it. A configured role or effort is authoritative: use the exposed native selector or agent configuration, and report an unavailable selector, unsupported model, or unsupported effort instead of silently dropping or replacing the choice.
+The strongest judgment role (`strongest judgment`) needs the user's confirmed strongest available Codex model; `gpt-6-astra` is an example, not an automatic selection. The example panel is `gpt-6-astra`, `gpt-6.1-sol`, `gpt-6.1-terra`, `gpt-6-luna`. Confirm each model against the active harness and account before using it. A configured role or effort is authoritative: use the exposed native selector or agent configuration, and report an unavailable selector, unsupported model, or unsupported effort instead of silently dropping or replacing the choice.
 
 Panel entries must resolve to distinct models for model diversity. Different effort levels on one model do not satisfy a diverse-model review gate. `/setup-pstack` records the chosen Codex models.
 
@@ -80,7 +82,7 @@ Affected skill entry points and the optional Codex slash stubs point here. Most 
 
 | Skill | On Codex |
 |-------|----------|
-| `interrogate` | The `subagent_type`/`model`/`readonly` dispatch fields map to `spawn_agent`; substitute your configured Codex models and keep the reviewer panel model-diverse. |
+| `interrogate` | The `subagent_type`/`model` dispatch fields map to `spawn_agent`; substitute your configured Codex models and keep the adversary panel model-diverse. |
 | `setup-pstack` | The skill's Other runtimes table names the Codex sheet path and how it loads; the slugs are your Codex models (see Model names above). The role rows are identical. |
 | `no-comments` | There is no `comment-sicko` subagent type; see Subagent policy above. |
 | `thermos` | There are no thermo-nuclear subagent types; see Subagent policy above. |

@@ -73,7 +73,7 @@ for (let i = start; i < raw.length; i++) {
 	lines.push({ n, text, code });
 	if (code) continue;
 	const prose = text
-		.replace(/`[^`]*`/g, "`")
+		.replace(/(?<!`)(`+)(?!`)(.*?)(?<!`)\1(?!`)/g, "`")
 		.replace(/!\[[^\]]*\]\([^)]*\)/g, "")
 		.replace(/\]\([^)]*\)/g, "]");
 	if (/[\u2013\u2014]/.test(prose)) fail(n, "long dash");
@@ -92,7 +92,7 @@ function sectionsAtLevel(lines, prefix) {
 }
 const sections = sectionsAtLevel(lines, "## ");
 const find = (title) => sections.find((s) => s.title === title);
-const bodyText = (s) => s.body.map((l) => l.text).join("\n");
+const bodyText = (s) => s.body.filter((l) => !l.code).map((l) => l.text).join("\n");
 const boxes = (ls) => ls.filter((l) => !l.code && BOX.test(l.text)).map((l) => ({ n: l.n, text: l.text.match(BOX)[1] }));
 
 // Native plans name the proof contract. This checks its shape, not whether
@@ -267,7 +267,7 @@ for (const pr of prSections) {
 			if (gateBoxes.length) fail(gate.n, `${pr.title}: Review gate says None but has boxes`);
 			if (native && !concrete(gate.rest.slice("None.".length).trim())) fail(gate.n, `${pr.title}: None review gate needs a reason`);
 		} else {
-			const text = gate.lines.map((l) => l.text).join("\n");
+			const text = gate.lines.filter((l) => !l.code).map((l) => l.text).join("\n");
 			if (gateBoxes.length === 0) fail(gate.n, `${pr.title}: Review gate has no box`);
 			const required = native && !surfaces?.has("ui") ? ["artifact", "operator"] : ["screenshot", "video", "operator"];
 			for (const word of required) {

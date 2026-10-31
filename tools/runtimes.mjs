@@ -17,13 +17,17 @@ import { code, codeList, PLUGIN, SKILLS } from "./plugin.mjs";
 // relative to the plugin root. GitHub Copilot stamps preambles but has no
 // prompts directory, since its CLI and app list plugin skills as slash commands
 // themselves, and no models.json block, since it ships no default models.
+// Muse declares its hooks inline in its native manifest, so it has no hooks
+// file either, and no prompts directory, since Muse lists each user-invocable
+// skill as a slash command itself and rejects a command whose id duplicates a
+// skill id. Its `stampManifest` rewrites the manifest's skill list from the tree.
 export const RUNTIMES = [
   {
     name: "Codex",
     key: "codex",
     mapping: "codex-tools.md",
     modelNames: codexModelNamesSection,
-    checkModels: checkCodexModels,
+    checkModels: tierExamples("codex"),
     skillPreambles: true,
     prompts: `${PLUGIN}/.codex-plugin/prompts`,
     manifest: `${PLUGIN}/.codex-plugin/plugin.json`,
@@ -53,6 +57,18 @@ export const RUNTIMES = [
     hooks: (manifest) => [manifest.hooks],
     pluginRootVar: "COPILOT_PLUGIN_ROOT",
   },
+  {
+    name: "Muse",
+    key: "muse",
+    mapping: "muse-tools.md",
+    modelNames: museModelNamesSection,
+    checkModels: tierExamples("muse"),
+    skillPreambles: true,
+    manifest: `${PLUGIN}/.muse-plugin/plugin.json`,
+    validate: ({ manifest, read, pathExists }) =>
+      validateMuseManifest(manifest, { claude: JSON.parse(read(`${PLUGIN}/.claude-plugin/plugin.json`)), pathExists }),
+    stampManifest: stampMuseManifest,
+  },
 ].map((runtime) => ({
   ...runtime,
   tools: `${SKILLS}/poteto-mode/references/${runtime.mapping}`,
@@ -63,18 +79,96 @@ export const RUNTIMES = [
     : null,
 }));
 
-// Codex has no Claude aliases, so its block gives an example model per tier.
-function checkCodexModels(codex, { raw, fail, unique }) {
-  for (const tier of Object.keys(raw.tiers)) {
-    if (!Object.hasOwn(codex, tier)) fail(`codex has no example for tier "${tier}"`);
+// Codex and Muse have no Claude aliases, so each block gives a model per tier.
+// A declaration, so the RUNTIMES rows above can call it at module load.
+function tierExamples(label) {
+  return (block, { raw, fail, unique }) => {
+    for (const tier of Object.keys(raw.tiers)) {
+      if (!Object.hasOwn(block, tier)) fail(`${label} has no example for tier "${tier}"`);
+    }
+    for (const [tier, value] of Object.entries(block)) {
+      if (!Object.hasOwn(raw.tiers, tier)) fail(`${label} names "${tier}", which is not a tier`);
+      unique([value].flat(), `${label} "${tier}"`);
+      if (label === "codex" && tier === "panel" && (!Array.isArray(value) || value.filter((s) => !["inherit-parent", "auto"].includes(s)).length < 2)) {
+        fail('codex "panel" needs at least two explicit models');
+      }
+    }
+  };
+}
+
+// The Muse manifest's skill list, rewritten from the tree the generator
+// planned: one skill capability per skill directory, each pointing at its
+// SKILL.md in the package. Commands stay empty: Muse surfaces each
+// user-invocable skill as a slash command itself and rejects a command whose
+// id duplicates a skill id. The SessionStart hooks are rewritten from
+// MUSE_HOOKS.
+export function stampMuseManifest(text, { skills }) {
+  const manifest = JSON.parse(text);
+  manifest.capabilities = {
+    ...manifest.capabilities,
+    skills: skills.map((name) => ({ id: name, path: `skills/${name}/SKILL.md`, enabledDefault: true })),
+    hooks: MUSE_HOOKS.map(({ id, command }) => ({
+      id,
+      event: "SessionStart",
+      command,
+      timeoutMs: 5000,
+      statusMessage: "Loading pstack routing",
+    })),
+  };
+  return JSON.stringify(manifest, null, 2) + "\n";
+}
+
+// Muse's native hook schema takes one command argv per hook, with no
+// per-OS variant, and rejects a `commandWindows`-style field. One argv
+// cannot spawn on every OS: Windows has no `sh` unless Git's usr\bin lands
+// on the harness PATH, and Unix has no powershell.exe. The manifest
+// therefore declares a pair, the shell script and the PowerShell script,
+// and each stands down on the OS the other owns.
+export const MUSE_HOOKS = [
+  { id: "session-start", script: "hooks/session-start.sh", command: ["sh", "hooks/session-start.sh", "muse"] },
+  {
+    id: "session-start-windows",
+    script: "hooks/session-start.ps1",
+    command: ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "hooks/session-start.ps1", "muse"],
+  },
+];
+
+// The Muse build is a native Muse plugin bundle: its manifest keeps the
+// Claude Code plugin's name, and every capability path it lists exists in the
+// package. The SessionStart hooks print the Muse context.
+export function validateMuseManifest(manifest, { claude, pathExists }) {
+  const at = `${PLUGIN}/.muse-plugin/plugin.json`;
+  if (manifest.name !== claude.name) throw new Error(`${at}: name "${manifest.name}" != Claude Code manifest name "${claude.name}"`);
+  if (manifest.schemaVersion !== 1) throw new Error(`${at}: schemaVersion "${manifest.schemaVersion}" is not 1`);
+  if (manifest.compat?.source !== "native" || manifest.compat?.manifestDir !== ".muse-plugin") {
+    throw new Error(`${at}: compat must be the native .muse-plugin manifest`);
   }
-  for (const [tier, value] of Object.entries(codex)) {
-    if (!Object.hasOwn(raw.tiers, tier)) fail(`codex names "${tier}", which is not a tier`);
-    unique([value].flat(), `codex "${tier}"`);
-    if (tier === "panel" && (!Array.isArray(value) || value.filter((s) => !["inherit-parent", "auto"].includes(s)).length < 2)) {
-      fail('codex "panel" needs at least two explicit models');
+  const skillIds = new Set();
+  const lists = [["skills", manifest.capabilities?.skills, true], ["commands", manifest.capabilities?.commands ?? [], false]];
+  for (const [kind, entries, required] of lists) {
+    if (!Array.isArray(entries) || (required && !entries.length)) throw new Error(`${at}: capabilities.${kind} is empty`);
+    const ids = new Set();
+    for (const entry of entries) {
+      if (ids.has(entry.id)) throw new Error(`${at}: capabilities.${kind} repeats "${entry.id}"`);
+      ids.add(entry.id);
+      if (kind === "skills") skillIds.add(entry.id);
+      if (kind === "commands" && skillIds.has(entry.id)) {
+        throw new Error(`${at}: command "${entry.id}" duplicates a skill id; Muse rejects it`);
+      }
+      if (typeof entry.path !== "string" || !pathExists(`${PLUGIN}/${entry.path}`)) {
+        throw new Error(`${at}: ${kind} "${entry.id}" path "${entry.path}" is not a file in the plugin`);
+      }
     }
   }
+  if (!manifest.capabilities.skills.some((entry) => entry.id === "poteto-mode")) {
+    throw new Error(`${at}: capabilities.skills has no "poteto-mode"`);
+  }
+  for (const { id, script } of MUSE_HOOKS) {
+    if (!pathExists(`${PLUGIN}/${script}`)) throw new Error(`${at}: SessionStart hook "${id}" runs ${script}, which is not in the plugin`);
+  }
+  // The PowerShell hook reads the roles from models.json at runtime, where
+  // sheet.awk has them stamped in.
+  if (!pathExists(`${PLUGIN}/models.json`)) throw new Error(`${at}: hooks/session-start.ps1 reads models.json, which is not in the plugin`);
 }
 
 // The pstack Pi extension resolves each Claude alias a skill names through the
@@ -108,6 +202,28 @@ const tierRoles = (models, tier) =>
     .map((r) => code(r.role))
     .join(", ");
 
+// The Model names section of a runtime whose models.json block gives a model
+// per tier. `panel` follows "A good default panel", `dispatch` is an optional
+// paragraph before the closing line, and `ids` names what the sheet lists.
+function tierModelNamesSection(models, { label, block, worker, panel, dispatch, ids }) {
+  return (
+    "Skills name Claude defaults (a single-role default for code/prose/judgment, a worker model for " +
+    "feature and refactoring code, plus a diverse-model panel for diverse-model panels; each model-consuming skill lists its own in a " +
+    `Models section). These slugs do not resolve on ${label}. Substitute your configured ${label} models:\n\n` +
+    `- Single-model roles: your primary ${label} model (for example ${code(block.default)}).\n` +
+    `- Roles that default to the Claude worker model (${tierRoles(models, "worker")}): ` +
+    `your ${worker} (for example ${code(block.worker)}).\n` +
+    `- Roles that default to the strongest Claude model (${tierRoles(models, "strongest")}): ` +
+    `your strongest ${label} model (for example ${code(block.strongest)}).\n` +
+    "- Diverse-model panels (`arena`, `architect`, `interrogate`, `how` critics, `reflect`): the adversarial " +
+    `signal comes from model diversity, so use the distinct ${label} models available to you. A good default panel ` +
+    panel(codeList(block.panel)) +
+    "\n\n" +
+    (dispatch ? `${dispatch}\n\n` : "") +
+    `\`/setup-pstack\` writes the configured model list. On ${label}, set it to your ${ids}.`
+  );
+}
+
 export function codexModelNamesSection(models) {
   return (
     "Follow the [model selection contract](model-selection.md). Ordinary single-model roles, including " +
@@ -122,6 +238,23 @@ export function codexModelNamesSection(models) {
     "Panel entries must resolve to distinct models for model diversity. Different effort levels on one " +
     "model do not satisfy a diverse-model review gate. `/setup-pstack` records the chosen Codex models."
   );
+}
+
+export function museModelNamesSection(models) {
+  return tierModelNamesSection(models, {
+    label: "Muse",
+    block: models.muse,
+    worker: "fast Muse model",
+    panel: (list) =>
+      `is ${list}. Muse serves one model family, so vary reasoning effort across the panel ` +
+      "too and note in the verdict that diversity was reduced.",
+    dispatch:
+      "Pass a role's model where the dispatch takes one: a Workflow child's `model`, or the session model when " +
+      "the dispatch has no model field. `subagent_spawn` takes an agent definition, not a model, so a role " +
+      "dispatched that way runs on the session's model and effort; a Workflow child takes both (see Subagent policy). " +
+      "`inherit-parent` or `auto` omits `model`.",
+    ids: "Muse model IDs, as `muse model-profile` and the model catalog name them",
+  });
 }
 
 export function piModelNamesSection(models) {
