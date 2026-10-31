@@ -11,11 +11,15 @@ On GitHub Copilot, read the [platform mapping](../poteto-mode/references/copilot
 
 On Muse, read the [platform mapping](../poteto-mode/references/muse-tools.md), including its per-skill notes, before following this skill.
 
+On Claude Code and Codex, follow the [native delegation contract](../poteto-mode/references/delegation.md) for worker capacity, lifecycle, installed source identity, and independent review. It takes precedence over the launch-all-at-once and native dispatch details below; the workflow and required evidence stay the same. Other harnesses retain the inherited procedure.
+
 Mine the current conversation for durable learnings, then route them into skill edits.
 
 Invoke when the user says "reflect" or "/reflect". Skip when the conversation is trivial, off-topic, or already covered by an existing skill the parent followed correctly. One-offs are not learnings.
 
 ## 1. Locate the active transcript
+
+On Claude Code and Codex, follow the [native history contract](../poteto-mode/references/history.md) for transcript discovery and evidence requirements in this skill. It replaces the Claude-only history paths and newest/fragment selection below; other harnesses retain the inherited procedure.
 
 Before fanning out, find this conversation's transcript in Claude Code's per-project transcripts directory at `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects/<encoded-cwd>/`. Do not glob across `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects/`. That crosses workspace boundaries and reads private chats from unrelated projects.
 

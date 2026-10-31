@@ -32,7 +32,7 @@
     },
     "plugins/pstack/skills/create-verification-skill/SKILL.md": {
       "kind": "port-feature",
-      "why": "Names the generated project skill verify so it replaces Claude Code's bundled user-only /verify and the playbooks can invoke it.",
+      "why": "Names the generated project skill verify so it replaces Claude Code's bundled user-only /verify and the playbooks can invoke it. Maps Claude/Codex project drivers, proof artifacts and lane resources through the verification reference.",
       "since": "0.9.29",
       "upstream": "not-proposed"
     },
@@ -44,19 +44,19 @@
     },
     "plugins/pstack/skills/poteto-help/SKILL.md": {
       "kind": "port-feature",
-      "why": "Routes installation, model-sheet loading, and persistent routing preferences to the current runtime's setup sources, gives installed playbooks precedence over upstream guides, and keeps the port's public skill loading, hidden principles, verification-skill naming, local-worker advice, driver and built-in equivalents, excluded make-bot-ui row, and orchestrate wording as prose changes in this fork, and routes \"stack them, don't ship\" to Autopilot-stack, because neither autopilot merges.",
+      "why": "Routes installation, model-sheet loading, and persistent routing preferences to the current runtime's setup sources, gives installed playbooks precedence over upstream guides, and keeps the port's public skill loading, hidden principles, verification-skill naming, local-worker advice, driver and built-in equivalents, excluded make-bot-ui row, and orchestrate wording as prose changes in this fork, and routes \"stack them, don't ship\" to Autopilot-stack, because neither autopilot merges. Claude Code and Codex help links use this personal fork's native installation instructions and public files.",
       "since": "0.9.71",
       "upstream": "not-proposed"
     },
     "plugins/pstack/skills/poteto-mode/SKILL.md": {
       "kind": "policy",
-      "why": "Adds the Claude Code, Codex, Pi, GitHub Copilot, and Muse Platform Adaptation section with its task-tool and todo.md fallback (per task slug when sessions share a checkout), the run-or-verify driver line, the deploy-platform and defect-severity triggers, the port's principle summaries, the project playbooks paragraph, and the closed-review-gate rule that the Codex and Pi mappings point to, and it points the Agent-call defaults at the Models section with full tool access and the namespaced pstack:poteto-agent name, requires stopping an abandoned agent before replacing it, renders every reply item as prose, layers technical-writing on top of unslop, and describes Autopilot-full as stopping at merge-ready for the operator's click and Autopilot-stack as Autopilot-full for PRs that build on each other.",
+      "why": "Adds the Claude Code, Codex, Pi, GitHub Copilot, and Muse Platform Adaptation section with its task-tool and todo.md fallback (per task slug when sessions share a checkout), the run-or-verify driver line, the deploy-platform and defect-severity triggers, the port's principle summaries, the project playbooks paragraph, and the closed-review-gate rule that the Codex and Pi mappings point to, and it points the Agent-call defaults at the Models section with full tool access and the namespaced pstack:poteto-agent name, requires stopping an abandoned agent before replacing it, renders every reply item as prose, layers technical-writing on top of unslop, and describes Autopilot-full as stopping at merge-ready for the operator's click and Autopilot-stack as Autopilot-full for PRs that build on each other. Maps Claude/Codex delegation, capacity and recovery through the native delegation reference. Maps Claude/Codex project drivers, proof artifacts and lane resources through the verification reference.",
       "since": "0.9.2",
       "upstream": "not-proposed"
     },
     "plugins/pstack/skills/poteto-mode/playbooks/autopilot-full.md": {
       "kind": "policy",
-      "why": "Owners stop at merge-ready and the operator clicks every merge, with the patch-id rule governing re-verification if trunk moves first, instead of each owner merging after a clean verdict, and the root writes the program objective into standing orders on the go and re-reads it each tick, arms the tick as a dynamic-mode /loop, states the program's size before the first owner starts and waits for the operator's go above three owners, scopes review lanes to what the diff breaks, and stops a PR at two fix-forwards.",
+      "why": "Owners stop at merge-ready and the operator clicks every merge, with the patch-id rule governing re-verification if trunk moves first, instead of each owner merging after a clean verdict, and the root writes the program objective into standing orders on the go and re-reads it each tick, arms the tick as a dynamic-mode /loop, states the program's size before the first owner starts and waits for the operator's go above three owners, scopes review lanes to what the diff breaks, and stops a PR at two fix-forwards. Maps Claude/Codex helper processes and landing recovery through the PR workflow reference.",
       "since": "0.9.39",
       "upstream": "not-proposed"
     },
@@ -68,7 +68,7 @@
     },
     "plugins/pstack/skills/poteto-mode/playbooks/babysit.md": {
       "kind": "policy",
-      "why": "Requires confirming that the first status read reports the requested PR or stack, and naming the merge frontier, before acting on it, and reports the watcher's behind-base gate to the branch owner instead of resolving it, as it does a conflict.",
+      "why": "Requires confirming that the first status read reports the requested PR or stack, and naming the merge frontier, before acting on it, and reports the watcher's behind-base gate to the branch owner instead of resolving it, as it does a conflict. Maps Claude/Codex helper processes and landing recovery through the PR workflow reference.",
       "since": "0.9.39",
       "upstream": "not-proposed"
     },
@@ -86,19 +86,19 @@
     },
     "plugins/pstack/skills/poteto-mode/playbooks/multi-phase-plan.md": {
       "kind": "port-feature",
-      "why": "Plans read skills from the installed plugin, keep the store under ~/.claude/orchestrate, write the program objective into standing orders, run the tick as a dynamic-mode /loop that re-reads that objective, run live lanes in worktrees through the driver skill the Non-negotiables resolve instead of on cloud VMs with control-ui or control-cli, name the configured swarm workers model instead of a placeholder, leave rebase and merge authority to the execution playbook, and pick Autopilot-stack only when a PR builds on another, because neither autopilot merges.",
+      "why": "Plans read skills from the installed plugin, keep the store under ~/.claude/orchestrate, write the program objective into standing orders, run the tick as a dynamic-mode /loop that re-reads that objective, run live lanes in worktrees through the driver skill the Non-negotiables resolve instead of on cloud VMs with control-ui or control-cli, name the configured swarm workers model instead of a placeholder, leave rebase and merge authority to the execution playbook, and pick Autopilot-stack only when a PR builds on another, because neither autopilot merges. Maps Claude/Codex project drivers, proof artifacts and lane resources through the verification reference.",
       "since": "0.9.19",
       "upstream": "not-proposed"
     },
     "plugins/pstack/skills/poteto-mode/playbooks/opening-a-pr.md": {
       "kind": "policy",
-      "why": "Requires stopping every live agent that holds a worktree before committing, merging, or deploying from it.",
+      "why": "Requires stopping every live agent that holds a worktree before committing, merging, or deploying from it. Maps Claude/Codex helper processes and landing recovery through the PR workflow reference.",
       "since": "0.9.10",
       "upstream": "not-proposed"
     },
     "plugins/pstack/skills/poteto-mode/playbooks/orchestrate.md": {
       "kind": "port-feature",
-      "why": "Runs workers as background subagents in per-writer worktrees under a ~/.claude/orchestrate store because Claude Code has no cloud worker environment, so store reads need no copy to local disk, and keeps human rulings in their original wording.",
+      "why": "Runs workers as background subagents in per-writer worktrees under a ~/.claude/orchestrate store because Claude Code has no cloud worker environment, so store reads need no copy to local disk, and keeps human rulings in their original wording. Maps Claude/Codex delegation, capacity and recovery through the native delegation reference. Maps Claude/Codex project drivers, proof artifacts and lane resources through the verification reference.",
       "since": "0.9.29",
       "upstream": "not-proposed"
     },
@@ -110,13 +110,13 @@
     },
     "plugins/pstack/skills/poteto-mode/playbooks/session-pickup.md": {
       "kind": "policy",
-      "why": "Reads the project checkpoint first and applies the human-rulings epistemics when reconstructing state.",
+      "why": "Reads the project checkpoint first and applies the human-rulings epistemics when reconstructing state. Uses workspace-scoped native Claude/Codex history.",
       "since": "0.9.34",
       "upstream": "not-proposed"
     },
     "plugins/pstack/skills/poteto-mode/playbooks/shipping.md": {
       "kind": "policy",
-      "why": "Lands one PR at a time under the user's landing authority, cancelling pending merges before any chain change, merging only under a service-enforced head condition, arming auto-merge or a queue only behind repository rules that enforce the verdict, and confirming each landing in the destination's history before advancing, with verifiers that drive the real surface through the driver skill in their own worktrees, a matching patch-id that keeps a review only after its applicability to the new base is checked, and the watcher owning blocker classification, with a branch behind its base routed to the topology owner.",
+      "why": "Lands one PR at a time under the user's landing authority, cancelling pending merges before any chain change, merging only under a service-enforced head condition, arming auto-merge or a queue only behind repository rules that enforce the verdict, and confirming each landing in the destination's history before advancing, with verifiers that drive the real surface through the driver skill in their own worktrees, a matching patch-id that keeps a review only after its applicability to the new base is checked, and the watcher owning blocker classification, with a branch behind its base routed to the topology owner. Maps Claude/Codex helper processes and landing recovery through the PR workflow reference.",
       "since": "0.9.34",
       "upstream": "not-proposed"
     },
@@ -134,7 +134,7 @@
     },
     "plugins/pstack/skills/poteto-mode/scripts/check-plan.mjs": {
       "kind": "port-feature",
-      "why": "Checks for the port's plan skeleton markers (standing orders, installed-plugin reads, an hourly cadence, the configured swarm workers model), requires a box under each program task and under Close the program, excludes fenced examples from required section and review-gate text, opens and closes a code fence at any indentation so a fence inside a list item counts, and strips a leading byte-order mark before parsing.",
+      "why": "Checks for the port's plan skeleton markers (standing orders, installed-plugin reads, an hourly cadence, the configured swarm workers model), requires a box under each program task and under Close the program, excludes fenced examples from required section and review-gate text, opens and closes a code fence at any indentation so a fence inside a list item counts, and strips a leading byte-order mark before parsing. Maps Claude/Codex project drivers, proof artifacts and lane resources through the verification reference.",
       "since": "0.9.19",
       "upstream": "not-proposed"
     },
@@ -242,13 +242,13 @@
     },
     "plugins/pstack/skills/recall/SKILL.md": {
       "kind": "policy",
-      "why": "Sweeps the locations the project's standing rules name before reporting anything as never recorded and applies the human-rulings epistemics, on top of Claude Code's transcript path.",
+      "why": "Sweeps the locations the project's standing rules name before reporting anything as never recorded and applies the human-rulings epistemics, on top of Claude Code's transcript path. Uses workspace-scoped native Claude/Codex history.",
       "since": "0.9.2",
       "upstream": "not-proposed"
     },
     "plugins/pstack/skills/reflect/SKILL.md": {
       "kind": "port-feature",
-      "why": "Finds the session transcript with the port's find-transcript.mjs under the Claude Code projects directory that claude-project-dir.mjs prints, keeps the parent's conclusions out of the reviewer prompts (a fallback digest records events without a verdict, and nothing goes beside a transcript path), and drops Cursor's readonly agent mode and inline model column.",
+      "why": "Finds the session transcript with the port's find-transcript.mjs under the Claude Code projects directory that claude-project-dir.mjs prints, keeps the parent's conclusions out of the reviewer prompts (a fallback digest records events without a verdict, and nothing goes beside a transcript path), and drops Cursor's readonly agent mode and inline model column. Uses workspace-scoped native Claude/Codex history. Maps Claude/Codex delegation, capacity and recovery through the native delegation reference.",
       "since": "0.1.0",
       "upstream": "not-proposed"
     },
@@ -260,7 +260,7 @@
     },
     "plugins/pstack/skills/show-me-your-work/SKILL.md": {
       "kind": "policy",
-      "why": "Documents that log.sh also neutralizes a cell opening with a double quote.",
+      "why": "Documents that log.sh also neutralizes a cell opening with a double quote. Uses workspace-scoped native Claude/Codex history.",
       "since": "0.9.41",
       "upstream": "not-proposed"
     },
@@ -298,6 +298,54 @@
       "kind": "policy",
       "why": "Adds a step that applies the human-rulings epistemics, and gives the Direct-claim example a URL the link validator resolves.",
       "since": "0.9.17",
+      "upstream": "not-proposed"
+    },
+    "plugins/pstack/agents/poteto-agent.md": {
+      "kind": "port-feature",
+      "why": "Maps Claude/Codex delegation, capacity and recovery through the native delegation reference.",
+      "since": "0.9.93",
+      "upstream": "not-proposed"
+    },
+    "plugins/pstack/skills/arena/SKILL.md": {
+      "kind": "port-feature",
+      "why": "Maps Claude/Codex delegation, capacity and recovery through the native delegation reference.",
+      "since": "0.9.93",
+      "upstream": "not-proposed"
+    },
+    "plugins/pstack/skills/automate-me/SKILL.md": {
+      "kind": "port-feature",
+      "why": "Routes Claude Code and Codex transcript evidence through the installed native history contract, with exact workspace/run identity and explicit limits on unavailable or inherited evidence; other harnesses retain their inherited procedures.",
+      "since": "0.9.93",
+      "upstream": "not-proposed"
+    },
+    "plugins/pstack/skills/how/SKILL.md": {
+      "kind": "port-feature",
+      "why": "Maps Claude/Codex delegation, capacity and recovery through the native delegation reference.",
+      "since": "0.9.93",
+      "upstream": "not-proposed"
+    },
+    "plugins/pstack/skills/interrogate/SKILL.md": {
+      "kind": "port-feature",
+      "why": "Maps Claude/Codex delegation, capacity and recovery through the native delegation reference.",
+      "since": "0.9.93",
+      "upstream": "not-proposed"
+    },
+    "plugins/pstack/skills/maintain-verification-skill/SKILL.md": {
+      "kind": "port-feature",
+      "why": "Scopes Claude Code/Codex target discovery, verifier tools, resource ownership, inspectable evidence and cleanup to the live verification contract; other harnesses retain the inherited procedure.",
+      "since": "0.9.93",
+      "upstream": "not-proposed"
+    },
+    "plugins/pstack/skills/poteto-mode/playbooks/eval.md": {
+      "kind": "port-feature",
+      "why": "Routes Claude Code and Codex transcript evidence through the installed native history contract, with exact workspace/run identity and explicit limits on unavailable or inherited evidence; other harnesses retain their inherited procedures.",
+      "since": "0.9.93",
+      "upstream": "not-proposed"
+    },
+    "plugins/pstack/skills/swarm/SKILL.md": {
+      "kind": "port-feature",
+      "why": "Maps Claude/Codex delegation, capacity and recovery through the native delegation reference.",
+      "since": "0.9.93",
       "upstream": "not-proposed"
     }
   },

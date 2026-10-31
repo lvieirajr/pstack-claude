@@ -11,6 +11,8 @@ A message that asks for work, such as "use pstack to fix this bug", is not a hel
 
 This file maps questions to the installed skills, playbooks, and platform mappings that own the answers. Read the matching source before answering. Its instructions take precedence over this map and any upstream guide, which describes Cursor and may differ from this port. The local links point into the installed plugin, so give the user the file's public copy: `https://github.com/michael-denyer/pstack-claude/blob/main/plugins/pstack/` followed by its path relative to the plugin root.
 
+On Claude Code and Codex, use this fork's [native installation commands](https://github.com/lvieirajr/pstack-claude/blob/main/README.md#install) and public file links under `https://github.com/lvieirajr/pstack-claude/blob/main/plugins/pstack/`. Other harnesses retain the inherited sources below.
+
 ## Find out what they need
 
 Infer the need from the message and the conversation. A named situation, such as "which skill reviews a PR?", goes straight to its section. If the need is still unclear, ask one multiple-choice question with these options, then answer only the section they pick:

@@ -20,8 +20,8 @@ This port translates upstream's Cursor skills for Claude Code before installatio
 Run in Claude Code 2.1.292 or later:
 
 ```text
-/plugin marketplace add michael-denyer/pstack-claude
-/plugin install pstack@pstack-claude
+/plugin marketplace add lvieirajr/pstack-claude
+/plugin install pstack@pstack
 ```
 
 Claude Code leaves auto-update off for third-party marketplaces, so pstack stays on the version you installed. To turn it on, run `/plugin`, open the **Marketplaces** tab, select `pstack-claude`, and choose **Enable auto-update**. To update once by hand, run `claude plugin update pstack@pstack-claude`.
@@ -35,8 +35,8 @@ Claude Code leaves auto-update off for third-party marketplaces, so pstack stays
 Run in your terminal:
 
 ```shell
-codex plugin marketplace add michael-denyer/pstack-claude
-codex plugin add pstack@pstack-claude
+codex plugin marketplace add lvieirajr/pstack-claude
+codex plugin add pstack@pstack
 ```
 
 </details>

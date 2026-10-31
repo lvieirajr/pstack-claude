@@ -16,9 +16,11 @@ pstack skills are written in Claude Code tool language (the `Skill` tool, the `A
 | Dispatch a subagent (the `Agent`/`Task` tool) | `spawn_agent` |
 | Dispatch N parallel subagents in one turn | N `spawn_agent` calls in one response |
 | Wait for a subagent result | `wait_agent` |
+| Message / follow up | The exposed `send_input`, `send_message`, or `followup_task`; inspect whether it queues or starts a turn. |
+| Interrupt / stop | The exposed interrupt, stop, or close action; confirm shutdown separately from the returned previous state. |
 | Free a finished subagent slot | `close_agent`, when the session exposes it. Some Codex hosts don't. |
 | Track tasks (the todolist; `TaskCreate` / `TaskUpdate`, or `TodoWrite` on Claude Code) | `update_plan` |
-| Ask the human a fixed-choice question (`AskUserQuestion`) | Ask in plain text and let the user answer. Codex has no structured-choice tool. |
+| Ask the human a fixed-choice question (`AskUserQuestion`) | Use a question tool when this host exposes one; otherwise ask in plain text and let the user answer. |
 
 Subagent dispatch needs `multi_agent` enabled. Add to `~/.codex/config.toml`:
 
@@ -32,6 +34,8 @@ Without it, `spawn_agent` is unavailable and the fan-out skills (`interrogate`, 
 Enabling `multi_agent` does not lift the host's thread limit. A thread-limit error from `spawn_agent` is a capacity error, not a rejected model slug, so the skills' fallback to another model does not apply. After the first capacity rejection, stop spawning. Close a finished agent with `close_agent` before you try again, and where the session has no `close_agent`, do not assume a finished agent's slot is free.
 
 ## Subagent policy
+
+Follow the [native delegation contract](delegation.md) for queued logical lanes, current native schemas, child source identity, cancellation, and interrupted-session recovery. Native tool names may be namespaced, and shell tools may run through `functions.exec`. Logical task paths returned by some hosts are lifecycle addresses, not persisted thread UUIDs; follow the history contract for any separate export identity. Treat a missing close/release action as a capacity limitation, and preserve required independent review.
 
 poteto-mode's Subagents section sets Claude-specific defaults (`subagent_type: "pstack:poteto-agent"`, `run_in_background: true`). On Codex:
 
@@ -64,7 +68,7 @@ A skills-only installation does not include plugin hooks. Request `poteto-mode` 
 
 ## Driver and bundled skills pstack references
 
-The [driver policy](../SKILL.md#non-negotiables) selects the app driver. For skills and drivers named by these workflows, use these Codex equivalents:
+The [live verification contract](verification.md) selects the project driver, evidence and resource ownership on Codex, taking precedence over the generic driver equivalents below. The [driver policy](../SKILL.md#non-negotiables) applies with that contract. For skills and drivers named by these workflows, use these Codex equivalents:
 
 | Skill or driver named in pstack | On Codex |
 |---------------------------------|----------|
@@ -84,16 +88,18 @@ Affected skill entry points and the optional Codex slash stubs point here. Most 
 | `no-comments` | There is no `comment-sicko` subagent type; see Subagent policy above. |
 | `thermos` | There are no thermo-nuclear subagent types; see Subagent policy above. |
 | `teach` | Running `how` and `why` in parallel maps to `spawn_agent` fan-out; image generation uses the configured Codex equivalent. |
-| `create-verification-skill` | The generated skill lands under `.claude/skills/verify/` on Claude Code; write it to Codex's project-skill location instead. The app-driving harness is platform-neutral. |
-| `maintain-verification-skill` | The parallel per-feature source readers map to `spawn_agent` fan-out; the project-local skill lives under Codex's skills location, not `.claude/skills/`. |
+| `create-verification-skill` | For a new Codex project driver, write `.agents/skills/verify/` under the repo or touched package; follow the [live verification contract](verification.md) for existing drivers, every generated output, and the isolation smoke test. |
+| `maintain-verification-skill` | The parallel per-feature source readers map to native delegation. Resolve the project-selected driver or `.agents/skills/verify/` under the [live verification contract](verification.md); keep source readers separate from the coordinator's live driving. |
 | `create-formal-verification-skill` | Write the generated skill to Codex's project-skill location, named for the area it verifies. The verifier and its run command are platform-neutral. |
 | `maintain-formal-verification-skill` | Project skills, the formal verification skill among them, live under Codex's project-skill location. |
 | `babysit` | `loop` and `AskUserQuestion` resolve through the tables above. |
-| `automate-me` | `plugin-dev:skill-development` resolves through the skills table above. |
+| `automate-me` | `plugin-dev:skill-development` resolves through the skills table above. Mine history through the [native history contract](history.md), using this workspace's exact Codex run IDs rather than Claude transcript paths. |
+| `recall` | Use the [native history contract](history.md) to select Codex runs in the requested workspace/window, excluding the current run. |
+| `show-me-your-work` | Audit the exact Codex run through the [native history contract](history.md); a digest cannot substitute for actual tool evidence. |
 | `architect` | The runner panel goes through the **arena** skill, so its `spawn_agent` fan-out and model substitution apply here too. |
 | `arena` | The parallel candidates and the cross-judge map to `spawn_agent`; substitute your configured Codex models for the runners and the cross-judge pool (see Model names above). |
 | `how` | The parallel explorers and the explainer map to `spawn_agent` fan-out; substitute your configured Codex models. |
-| `reflect` | The three reviewers and the synthesizer map to `spawn_agent`; substitute your configured Codex models. The transcript finder reads Claude Code's layout under `${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects/`, so pass the session digest step 1 allows instead. |
+| `reflect` | The three reviewers and the synthesizer map to `spawn_agent`; substitute your configured Codex models. Read the exact Codex run through the [native history contract](history.md); use step 1's neutral digest only when native evidence is unavailable. |
 | `swarm` | Each worker is a `spawn_agent` call on your configured Codex model, and those calls already run concurrently; give each writing worker its own worktree or output directory (see Subagent policy above). |
 | `why` | The parallel investigators and the synthesizer map to `spawn_agent`; substitute your configured Codex models. List MCP servers from the tools Codex exposes to the session, not from `.mcp.json` or `claude mcp list`. |
 

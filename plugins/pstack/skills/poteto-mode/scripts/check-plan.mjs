@@ -28,9 +28,10 @@ const HOW_TO_READ_MARKERS = [
 const PERF_ITEMS = ["Metric.", "Probe.", "Baseline.", "Rule."];
 const BOX = /^\s*- \[[ x]\] (.*)$/;
 
-const file = process.argv[2];
-if (!file) {
-	console.error("Usage: node check-plan.mjs <plan.md>");
+const [file, ...args] = process.argv.slice(2);
+const native = args.length === 2 && args[0] === "--runtime" && ["claude", "codex"].includes(args[1]);
+if (!file || (args.length && !native)) {
+	console.error("Usage: node check-plan.mjs <plan.md> [--runtime claude|codex]");
 	process.exit(2);
 }
 
@@ -93,6 +94,82 @@ const sections = sectionsAtLevel(lines, "## ");
 const find = (title) => sections.find((s) => s.title === title);
 const bodyText = (s) => s.body.filter((l) => !l.code).map((l) => l.text).join("\n");
 const boxes = (ls) => ls.filter((l) => !l.code && BOX.test(l.text)).map((l) => ({ n: l.n, text: l.text.match(BOX)[1] }));
+
+// Native plans name the proof contract. This checks its shape, not whether
+// commands ran, artifacts exist, or the claimed decision authorizes fewer lanes.
+const field = (text, name) =>
+	text.match(new RegExp(name + " `([^`]+)`"))?.[1]?.trim();
+const concrete = (value) => Boolean(value && !/^<[^>]+>$/.test(value));
+function nativeLive(live, title) {
+	const required = field(live.rest, "Required lanes");
+	const count = Number(required);
+	if (!/^[1-9]\d*$/.test(required ?? "") || !Number.isSafeInteger(count)) {
+		fail(live.n, `${title}: Required lanes must be a positive integer`);
+	}
+	if (!live.rest.includes("at the PR head"))
+		fail(live.n, `${title}: live proof must name the PR head`);
+	if (!live.rest.includes("on the configured `swarm workers` model")) fail(live.n, `${title}: live proof must use the configured swarm workers model`);
+	if (count !== 10 && !concrete(field(live.rest, "Lane decision"))) {
+		fail(
+			live.n,
+			`${title}: a nondefault count requires Lane decision with its user/repository source and reason`
+		);
+	}
+	const lanes = boxes(live.lines).map((b) => ({
+		...b,
+		m: b.text.match(/^Lane (\d+)\. /),
+	}));
+	const numbers = lanes
+		.filter((b) => b.m)
+		.map((b) => Number(b.m[1]))
+		.sort((a, b) => a - b);
+	if (numbers.length !== count || numbers.some((n, i) => n !== i + 1)) {
+		fail(
+			live.n,
+			`${title}: lanes are [${numbers.join(",")}], expected 1 to ${required}`
+		);
+	}
+	if (!lanes.some((b) => b.text.includes("Regression lane against trunk."))) {
+		fail(live.n, `${title}: no Regression lane against trunk`);
+	}
+	const surfaces = new Set();
+	for (const lane of lanes) {
+		if (!lane.m) fail(lane.n, `${title}: live box is not a lane`);
+		const surface = field(lane.text, "Surface");
+		const artifact = field(lane.text, "Artifact");
+		surfaces.add(surface);
+		const kinds = {
+			cli: ["transcript"],
+			api: ["response"],
+			ui: ["screenshot", "video"],
+		};
+		if (!Object.hasOwn(kinds, surface ?? ""))
+			fail(lane.n, `${title}: lane needs Surface cli, api, or ui`);
+		else if (!kinds[surface].includes(artifact))
+			fail(
+				lane.n,
+				`${title}: ${surface} lane needs an appropriate artifact (${kinds[surface].join(" or ")})`
+			);
+		if (
+			!concrete(field(lane.text, "Run")) &&
+			!concrete(field(lane.text, "Drive"))
+		) {
+			fail(
+				lane.n,
+				`${title}: lane needs a concrete Run command or Drive tool/action`
+			);
+		}
+		if (!concrete(field(lane.text, "Save")))
+			fail(lane.n, `${title}: lane names no artifact path`);
+		const predicate = lane.text
+			.match(/Pass when (.+)/)?.[1]
+			?.replace(/\.$/, "")
+			.trim();
+		if (!concrete(predicate))
+			fail(lane.n, `${title}: lane has no pass predicate`);
+	}
+	return surfaces;
+}
 
 const h1 = lines.findIndex((l) => !l.code && l.text.startsWith("# "));
 if (h1 === -1) fail(1, "no H1 title");
@@ -163,7 +240,9 @@ for (const pr of prSections) {
 	}
 
 	const live = block("Verify, live.");
-	if (live) {
+	let surfaces;
+	if (live && native) surfaces = nativeLive(live, pr.title);
+	else if (live) {
 		if (!live.rest.includes(LANES)) fail(live.n, `${pr.title}: Verify, live lacks "${LANES}"`);
 		const lanes = boxes(live.lines).map((b) => ({ ...b, m: b.text.match(/^Lane (\d+)\. /) }));
 		const numbers = lanes.filter((b) => b.m).map((b) => Number(b.m[1])).sort((a, b) => a - b);
@@ -186,10 +265,12 @@ for (const pr of prSections) {
 		const gateBoxes = boxes(gate.lines);
 		if (gate.rest.startsWith("None.")) {
 			if (gateBoxes.length) fail(gate.n, `${pr.title}: Review gate says None but has boxes`);
+			if (native && !concrete(gate.rest.slice("None.".length).trim())) fail(gate.n, `${pr.title}: None review gate needs a reason`);
 		} else {
 			const text = gate.lines.filter((l) => !l.code).map((l) => l.text).join("\n");
 			if (gateBoxes.length === 0) fail(gate.n, `${pr.title}: Review gate has no box`);
-			for (const word of ["screenshot", "video", "operator"]) {
+			const required = native && !surfaces?.has("ui") ? ["artifact", "operator"] : ["screenshot", "video", "operator"];
+			for (const word of required) {
 				if (!text.includes(word)) fail(gate.n, `${pr.title}: Review gate lacks "${word}"`);
 			}
 		}
