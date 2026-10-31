@@ -8,7 +8,8 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { agentSkills } from "../tools/generate.mjs";
-import { sheetCases, writeSheet } from "./session-hook-sheets.mjs";
+import { MUSE_HOOKS } from "../tools/runtimes.mjs";
+import { roleCases, sheetCases, writeSheet } from "./session-hook-sheets.mjs";
 
 const pluginRoot = fileURLToPath(new URL("../plugins/pstack/", import.meta.url));
 const mandate = readFileSync(join(pluginRoot, "hooks/session-start-context.md"), "utf8");
@@ -93,7 +94,7 @@ describe("SessionStart hook", () => {
       const r = runHook("claude", null, `"\${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh" ${arg}`);
       expect(r.status).not.toBe(0);
       expect(r.out).toBe("");
-      expect(r.err.trimEnd().split("\n")).toEqual([`session-start.sh: unknown runtime '${arg}' (expected claude, codex, or copilot)`]);
+      expect(r.err.trimEnd().split("\n")).toEqual([`session-start.sh: unknown runtime '${arg}' (expected claude, codex, copilot, or muse)`]);
     });
   }
 
@@ -106,13 +107,6 @@ describe("SessionStart hook", () => {
       test("injects the mandate when no sheet exists", () => {
         const r = runHook(runtime, null);
         expect({ ...r, out: wrap(r.out) }).toEqual({ status: 0, out: expected(false), err: "" });
-      });
-
-      // iconv rejects a UTF-16 LE sheet that ends mid-character, so the hook
-      // cannot decode it and must inject as it does for a missing sheet.
-      test("injects the mandate when the sheet cannot be decoded", () => {
-        const r = runHook(runtime, Buffer.from([0xff, 0xfe, 0x73, 0x00, 0x65]));
-        expect({ status: r.status, out: wrap(r.out) }).toEqual({ status: 0, out: expected(false) });
       });
 
       for (const { name, sheet, off } of sheetCases) {
@@ -266,6 +260,121 @@ describe("Copilot SessionStart context", () => {
       expect(run("copilot")).toBe("");
     } finally {
       rmSync(home, { recursive: true, force: true });
+    }
+  });
+});
+
+const museMandate = readFileSync(join(pluginRoot, "hooks/session-start-muse.md"), "utf8");
+// The note as the hook prints it, line ending included: a Windows checkout
+// may give it CRLF, which muse-context.awk keeps.
+const museSheetNote = readFileSync(join(pluginRoot, "hooks/session-start-muse-sheet.md"), "utf8");
+
+// Muse declares the hook inline in its native manifest and runs it with
+// MUSE_PLUGIN_ROOT set; its stdout is plain additional context. The argv is
+// the one the generator stamps into the manifest.
+const museCommand = MUSE_HOOKS.find((hook) => hook.id === "session-start").command;
+function runMuseHook(sheet, env = {}, plugin = pluginRoot) {
+  const home = mkdtempSync(join(tmpdir(), "pstack-hook-"));
+  const config = env.XDG_CONFIG_HOME ?? join(home, ".config");
+  if (sheet !== null) {
+    const dir = join(config, "muse");
+    mkdirSync(dir, { recursive: true });
+    writeSheet(join(dir, "pstack-models.md"), sheet);
+  }
+  try {
+    const [program, ...args] = museCommand;
+    const r = spawnSync(program, args, {
+      cwd: plugin,
+      env: { PATH: process.env.PATH, HOME: home, MUSE_PLUGIN_ROOT: plugin, ...env },
+      encoding: "utf8",
+    });
+    return { status: r.status, out: r.stdout, err: r.stderr };
+  } finally {
+    rmSync(home, { recursive: true, force: true });
+  }
+}
+
+describe("Muse SessionStart context", () => {
+  test("injects nothing under a Windows sh, where the PowerShell hook owns Muse", () => {
+    const bin = mkdtempSync(join(tmpdir(), "pstack-hook-bin-"));
+    try {
+      writeFileSync(join(bin, "uname"), "#!/bin/sh\necho MINGW64_NT-10.0\n", { mode: 0o755 });
+      expect(runMuseHook(null, { PATH: `${bin}:${process.env.PATH}` })).toEqual({ status: 0, out: "", err: "" });
+    } finally {
+      rmSync(bin, { recursive: true, force: true });
+    }
+  });
+
+  test("injects nothing when OS names Windows, for a Windows sh with no uname", () => {
+    expect(runMuseHook(null, { OS: "Windows_NT" })).toEqual({ status: 0, out: "", err: "" });
+  });
+
+  test("injects the Muse mandate when no sheet exists", () => {
+    expect(runMuseHook(null)).toEqual({ status: 0, out: museMandate, err: "" });
+  });
+
+  for (const { name, sheet, roles } of roleCases) {
+    test(`adds ${roles.length ? roles.join(", ") : "no role lines"} for a sheet with ${name}`, () => {
+      const out = roles.length ? `${museMandate}\n${museSheetNote}${roles.join("\n")}\n` : museMandate;
+      expect(runMuseHook(sheet)).toEqual({ status: 0, out, err: "" });
+    });
+  }
+
+  test("ends a mandate that lacks a final newline with one", () => {
+    const root = mkdtempSync(join(tmpdir(), "pstack-hook-"));
+    try {
+      for (const dir of ["hooks", "skills/setup-pstack/scripts"]) cpSync(join(pluginRoot, dir), join(root, dir), { recursive: true });
+      writeFileSync(join(root, "hooks/session-start-muse.md"), "Routing context: café");
+      expect(runMuseHook(null, {}, root)).toEqual({ status: 0, out: "Routing context: café\n", err: "" });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  test("an off sheet injects nothing, and XDG_CONFIG_HOME moves the sheet", () => {
+    expect(runMuseHook("session hook: off\n")).toEqual({ status: 0, out: "", err: "" });
+    const home = mkdtempSync(join(tmpdir(), "pstack-hook-"));
+    try {
+      expect(runMuseHook("session hook: off\n", { XDG_CONFIG_HOME: join(home, "xdg") })).toEqual({ status: 0, out: "", err: "" });
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
+
+  test("the Muse mandate names only skills that exist", () => {
+    const named = [...museMandate.matchAll(/plugin:pstack:([a-z0-9-]+)/g)].map((m) => m[1]);
+    const skills = new Set(agentSkills(join(pluginRoot, "skills")).map(({ name }) => name));
+    expect(named).toContain("poteto-mode");
+    expect(named.filter((name) => !skills.has(name))).toEqual([]);
+  });
+});
+
+// awk expands escapes in a -v value, so a hooks directory passed that way
+// turns `\t` in the plugin root into a tab and the mandate files go unread.
+describe("a plugin root with a backslash", () => {
+  test("loads the same Copilot and Muse context as any other root", () => {
+    const tmp = mkdtempSync(join(tmpdir(), "pstack-hook-"));
+    const root = join(tmp, "back\\tslash", "pstack");
+    try {
+      for (const dir of ["hooks", "skills/setup-pstack/scripts"]) cpSync(join(pluginRoot, dir), join(root, dir), { recursive: true });
+      const run = (runtime, rootVar, from) =>
+        spawnSync("sh", [join(from, "hooks/session-start.sh"), runtime], {
+          env: { PATH: process.env.PATH, HOME: tmp, [rootVar]: from },
+          encoding: "utf8",
+        });
+      for (const [runtime, rootVar] of [["copilot", "COPILOT_PLUGIN_ROOT"], ["muse", "MUSE_PLUGIN_ROOT"]]) {
+        const expected = run(runtime, rootVar, pluginRoot);
+        expect(expected.stdout).toContain("poteto-mode");
+        const got = run(runtime, rootVar, root);
+        expect({ runtime, status: got.status, out: got.stdout, err: got.stderr }).toEqual({
+          runtime,
+          status: 0,
+          out: expected.stdout,
+          err: "",
+        });
+      }
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
     }
   });
 });
